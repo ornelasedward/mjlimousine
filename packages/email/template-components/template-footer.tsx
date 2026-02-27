@@ -15,11 +15,7 @@ export const TemplateFooter = ({ isDocument = true }: TemplateFooterProps) => {
       {isDocument && !branding.brandingHidePoweredBy && (
         <Text className="my-4 text-base text-slate-400">
           <Trans>
-            This document was sent using{' '}
-            <Link className="text-[#7AC455]" href="https://documen.so/mail-footer">
-              Documenso
-            </Link>
-            .
+            This document was sent by MJ Limousine Service.
           </Trans>
         </Text>
       )}
@@ -39,9 +35,9 @@ export const TemplateFooter = ({ isDocument = true }: TemplateFooterProps) => {
 
       {!branding.brandingEnabled && (
         <Text className="my-8 text-sm text-slate-400">
-          Documenso, Inc.
+          MJ Limousine Service
           <br />
-          2261 Market Street, #5211, San Francisco, CA 94114, USA
+          mjlimousineservice.com
         </Text>
       )}
     </Section>
