@@ -81,6 +81,8 @@ COPY turbo.json turbo.json
 
 RUN npm install -g "turbo@^1.9.3"
 
+RUN chmod +x ./apps/remix/.bin/build.sh
+
 RUN turbo run build --filter=@documenso/remix...
 
 ###########################
