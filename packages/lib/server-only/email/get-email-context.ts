@@ -15,7 +15,7 @@ import {
   type OrganisationGlobalSettings,
 } from '@documenso/prisma/client';
 
-import { DOCUMENSO_INTERNAL_EMAIL } from '../../constants/email';
+import { DOCUMENSO_INTERNAL_EMAIL, REPLY_TO_ADDRESS } from '../../constants/email';
 import { AppError, AppErrorCode } from '../../errors/app-error';
 import {
   organisationGlobalSettingsToBranding,
@@ -100,12 +100,12 @@ export const getEmailContext = async (
     return {
       ...emailContext,
       senderEmail: DOCUMENSO_INTERNAL_EMAIL,
-      replyToEmail: undefined,
+      replyToEmail: REPLY_TO_ADDRESS,
       emailLanguage, // Not sure if we want to use this for internal emails.
     };
   }
 
-  const replyToEmail = meta?.emailReplyTo || emailContext.settings.emailReplyTo || undefined;
+  const replyToEmail = meta?.emailReplyTo || emailContext.settings.emailReplyTo || REPLY_TO_ADDRESS;
 
   const senderEmailId = match(meta?.emailId)
     .with(P.string, (emailId) => emailId) // Explicit string means to use the provided email ID.
