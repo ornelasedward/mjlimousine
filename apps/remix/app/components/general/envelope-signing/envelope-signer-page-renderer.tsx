@@ -140,6 +140,11 @@ export default function EnvelopeSignerPageRenderer() {
       return;
     }
 
+    // FILE fields are rendered by the React overlay, not the canvas renderer.
+    if (unparsedField.type === FieldType.FILE) {
+      return;
+    }
+
     const fieldToRender = ZFullFieldSchema.parse(unparsedField);
 
     let color: TRecipientColor = 'green';
@@ -403,6 +408,12 @@ export default function EnvelopeSignerPageRenderer() {
             .finally(() => {
               loadingSpinnerGroup.destroy();
             });
+        })
+        /**
+         * FILE FIELD — handled by the React-based signing UI, not this canvas renderer.
+         */
+        .with({ type: FieldType.FILE }, () => {
+          loadingSpinnerGroup.destroy();
         })
         .exhaustive();
     };

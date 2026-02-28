@@ -189,7 +189,7 @@ export type TFieldDropdown = z.infer<typeof ZFieldDropdownSchema>;
 
 export const ZFieldFileSchema = BaseFieldSchemaUsingNumbers.extend({
   type: z.literal(FieldType.FILE),
-  fieldMeta: ZFileFieldMeta.optional(),
+  fieldMeta: ZFileFieldMeta.nullable(),
 });
 
 export type TFieldFile = z.infer<typeof ZFieldFileSchema>;
