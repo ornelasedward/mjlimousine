@@ -27,7 +27,7 @@ export const OrganisationJoinEmailTemplate = ({
   const { _ } = useLingui();
   const branding = useBranding();
 
-  const previewText = msg`A member has joined your organisation on Documenso`;
+  const previewText = msg`A member has joined your organisation on MJ Limousine`;
 
   return (
     <Html>
@@ -43,7 +43,7 @@ export const OrganisationJoinEmailTemplate = ({
               <TemplateImage
                 assetBaseUrl={assetBaseUrl}
                 className="mb-4 h-6 p-2"
-                staticAsset="logo.png"
+                staticAsset="mj.jpg"
               />
             )}
 

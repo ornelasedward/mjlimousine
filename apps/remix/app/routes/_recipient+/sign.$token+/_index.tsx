@@ -381,7 +381,7 @@ const SigningPageV1 = ({ data }: { data: Awaited<ReturnType<typeof handleV1Loade
                   to="https://documenso.com"
                   className="text-documenso-700 hover:text-documenso-600"
                 >
-                  Check out Documenso
+                  Check out MJ Limousine
                 </Link>
                 .
               </Trans>
@@ -481,7 +481,7 @@ const SigningPageV2 = ({ data }: { data: Awaited<ReturnType<typeof handleV2Loade
                   to="https://documenso.com"
                   className="text-documenso-700 hover:text-documenso-600"
                 >
-                  Check out Documenso
+                  Check out MJ Limousine
                 </Link>
                 .
               </Trans>

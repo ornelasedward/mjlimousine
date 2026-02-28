@@ -43,12 +43,12 @@ export const AdminLicenseStatusBanner = ({ license }: AdminLicenseStatusBannerPr
             .with('UNAUTHORIZED', () =>
               license ? (
                 <Trans>
-                  Invalid License Type - Your Documenso instance is using features that are not part
+                  Invalid License Type - Your MJ Limousine instance is using features that are not part
                   of your license.
                 </Trans>
               ) : (
                 <Trans>
-                  Missing License - Your Documenso instance is using features that require a
+                  Missing License - Your MJ Limousine instance is using features that require a
                   license.
                 </Trans>
               ),
