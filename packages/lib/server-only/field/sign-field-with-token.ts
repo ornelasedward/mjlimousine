@@ -310,6 +310,7 @@ export const signFieldWithToken = async ({
               FieldType.RADIO,
               FieldType.CHECKBOX,
               FieldType.DROPDOWN,
+              FieldType.FILE,
               (type) => ({
                 type,
                 data: updatedField.customText,

@@ -95,5 +95,8 @@ export const renderField = ({
     .with(FieldType.FREE_SIGNATURE, () => {
       throw new Error('Free signature fields are not supported');
     })
+    .with(FieldType.FILE, () => {
+      throw new Error('File upload fields are not supported in PDF rendering');
+    })
     .exhaustive();
 };

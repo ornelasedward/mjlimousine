@@ -1433,6 +1433,10 @@ export const ApiContractV1Implementation = tsr.router(ApiContractV1, {
                 error: 'FREE_SIGNATURE is not supported',
                 data: undefined,
               }))
+              .with('FILE', () => ({
+                success: true,
+                data: undefined,
+              }))
               .exhaustive();
 
             if (!result.success) {

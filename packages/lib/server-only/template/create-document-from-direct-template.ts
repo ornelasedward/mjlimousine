@@ -630,6 +630,7 @@ export const createDocumentFromDirectTemplate = async ({
                 FieldType.CHECKBOX,
                 FieldType.DROPDOWN,
                 FieldType.RADIO,
+                FieldType.FILE,
                 (type) => ({
                   type,
                   data: field.customText,
