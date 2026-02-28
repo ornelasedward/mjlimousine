@@ -580,26 +580,9 @@ export const AddFieldsFormPartial = ({
 
         if (hasSignatureField) return;
 
-        // All fields must have pre-fill values in fieldMeta.
-        const allHavePreFill = recipientFields.every((f) => {
-          const meta = f.fieldMeta;
-          if (!meta) return false;
-
-          if (f.type === FieldType.TEXT && 'text' in meta) return Boolean(meta.text);
-          if (f.type === FieldType.NUMBER && 'value' in meta) return Boolean(meta.value);
-          if (f.type === FieldType.RADIO && 'values' in meta)
-            return (meta.values ?? []).some((v) => 'checked' in v && v.checked);
-          if (f.type === FieldType.DROPDOWN && 'defaultValue' in meta)
-            return Boolean(meta.defaultValue);
-          if (f.type === FieldType.CHECKBOX && 'values' in meta)
-            return (meta.values ?? []).some((v) => 'checked' in v && v.checked);
-
-          return false;
-        });
-
-        if (allHavePreFill) {
-          autoCompleteRecipientIds.add(recipient.id);
-        }
+        // Owner has only non-signature fields — exempt from the "must have signature field"
+        // requirement regardless of whether pre-fill values are set yet.
+        autoCompleteRecipientIds.add(recipient.id);
       });
     }
 

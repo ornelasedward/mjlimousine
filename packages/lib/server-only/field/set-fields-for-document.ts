@@ -136,10 +136,12 @@ export const setFieldsForDocument = async ({
     };
   });
 
-  const persistedFields = await prisma.$transaction(async (tx) => {
-    return await Promise.all(
-      linkedFields.map(async (field) => {
-        const fieldSignerEmail = field._recipient.email.toLowerCase();
+  const persistedFields = await prisma.$transaction(
+    async (tx) => {
+      return await Promise.all(
+        linkedFields.map(async (field) => {
+          const fieldSignerEmail = field._recipient.email.toLowerCase();
+
 
         const parsedFieldMeta = field.fieldMeta
           ? ZFieldMetaSchema.parse(field.fieldMeta)
@@ -312,7 +314,9 @@ export const setFieldsForDocument = async ({
         };
       }),
     );
-  });
+  },
+  { timeout: 30000 },
+  );
 
   if (removedFields.length > 0) {
     await prisma.$transaction(async (tx) => {
@@ -339,7 +343,7 @@ export const setFieldsForDocument = async ({
           }),
         ),
       });
-    });
+    }, { timeout: 30000 });
   }
 
   // Filter out fields that have been removed or have been updated.
