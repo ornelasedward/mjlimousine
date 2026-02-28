@@ -14,6 +14,7 @@ import {
   Disc,
   Hash,
   Mail,
+  Paperclip,
   Type,
   User,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { getBoundingClientRect } from '@documenso/lib/client-only/get-bounding-client-rect';
 import { useAutoSave } from '@documenso/lib/client-only/hooks/use-autosave';
 import { useDocumentElement } from '@documenso/lib/client-only/hooks/use-document-element';
+import { useSession } from '@documenso/lib/client-only/providers/session';
 import { PDF_VIEWER_PAGE_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
 import {
   type TFieldMetaSchema as FieldMeta,
@@ -105,6 +107,7 @@ export const AddFieldsFormPartial = ({
 }: AddFieldsFormProps) => {
   const { toast } = useToast();
   const { _ } = useLingui();
+  const { user } = useSession();
 
   const [isMissingSignatureDialogVisible, setIsMissingSignatureDialogVisible] = useState(false);
 
@@ -556,9 +559,55 @@ export const AddFieldsFormPartial = ({
   };
 
   const handleGoNextClick = () => {
+    // Identify owner-auto-complete recipients: the owner has added themselves with only
+    // pre-filled non-signature fields, meaning they don't need a signature field.
+    const ownerEmailLower = user?.email?.toLowerCase();
+    const autoCompleteRecipientIds = new Set<number>();
+
+    if (ownerEmailLower) {
+      recipients.forEach((recipient) => {
+        if (recipient.email.toLowerCase() !== ownerEmailLower) return;
+
+        const recipientFields = localFields.filter((f) => f.recipientId === recipient.id);
+        if (recipientFields.length === 0) return;
+
+        const hasSignatureField = recipientFields.some(
+          (f) =>
+            f.type === FieldType.SIGNATURE ||
+            f.type === FieldType.FREE_SIGNATURE ||
+            f.type === FieldType.INITIALS,
+        );
+
+        if (hasSignatureField) return;
+
+        // All fields must have pre-fill values in fieldMeta.
+        const allHavePreFill = recipientFields.every((f) => {
+          const meta = f.fieldMeta;
+          if (!meta) return false;
+
+          if (f.type === FieldType.TEXT && 'text' in meta) return Boolean(meta.text);
+          if (f.type === FieldType.NUMBER && 'value' in meta) return Boolean(meta.value);
+          if (f.type === FieldType.RADIO && 'values' in meta)
+            return (meta.values ?? []).some((v) => 'checked' in v && v.checked);
+          if (f.type === FieldType.DROPDOWN && 'defaultValue' in meta)
+            return Boolean(meta.defaultValue);
+          if (f.type === FieldType.CHECKBOX && 'values' in meta)
+            return (meta.values ?? []).some((v) => 'checked' in v && v.checked);
+
+          return false;
+        });
+
+        if (allHavePreFill) {
+          autoCompleteRecipientIds.add(recipient.id);
+        }
+      });
+    }
+
     // localFields already have recipientId set correctly (see field creation at line 338)
-    // Using the existing recipientId is important for handling duplicate email recipients
-    const recipientsMissingFields = getRecipientsWithMissingFields(recipients, localFields);
+    // Using the existing recipientId is important for handling duplicate email recipients.
+    // Exclude owner-auto-complete recipients from the missing signature field check.
+    const recipientsToValidate = recipients.filter((r) => !autoCompleteRecipientIds.has(r.id));
+    const recipientsMissingFields = getRecipientsWithMissingFields(recipientsToValidate, localFields);
 
     if (recipientsMissingFields.length > 0) {
       setIsMissingSignatureDialogVisible(true);
@@ -954,6 +1003,31 @@ export const AddFieldsFormPartial = ({
                           >
                             <ChevronDown className="h-4 w-4" />
                             <Trans>Dropdown</Trans>
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="group h-full w-full"
+                      onClick={() => setSelectedField(FieldType.FILE)}
+                      onMouseDown={() => setSelectedField(FieldType.FILE)}
+                      data-selected={selectedField === FieldType.FILE ? true : undefined}
+                    >
+                      <Card
+                        className={cn(
+                          'flex h-full w-full cursor-pointer items-center justify-center group-disabled:opacity-50',
+                        )}
+                      >
+                        <CardContent className="p-4">
+                          <p
+                            className={cn(
+                              'flex items-center justify-center gap-x-1.5 text-sm font-normal text-muted-foreground group-data-[selected]:text-foreground',
+                            )}
+                          >
+                            <Paperclip className="h-4 w-4" />
+                            <Trans>File Upload</Trans>
                           </p>
                         </CardContent>
                       </Card>

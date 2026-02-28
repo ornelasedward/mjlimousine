@@ -953,6 +953,47 @@ export const AddSignersFormPartial = ({
                 <Plus className="-ml-1 mr-2 h-5 w-5" />
                 <Trans>Add myself</Trans>
               </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isSubmitting || isUserAlreadyARecipient}
+                onClick={() => {
+                  if (emptySignerIndex !== -1) {
+                    setValue(`signers.${emptySignerIndex}.name`, user?.name ?? '', {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                    setValue(`signers.${emptySignerIndex}.email`, user?.email ?? '', {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                    form.setFocus(`signers.${emptySignerIndex}.email`);
+                  } else {
+                    appendSigner(
+                      {
+                        formId: nanoid(12),
+                        name: user?.name ?? '',
+                        email: user?.email ?? '',
+                        role: RecipientRole.SIGNER,
+                        actionAuth: [],
+                        signingOrder:
+                          signers.length > 0
+                            ? (signers[signers.length - 1]?.signingOrder ?? 0) + 1
+                            : 1,
+                      },
+                      {
+                        shouldFocus: true,
+                      },
+                    );
+
+                    void form.trigger('signers');
+                  }
+                }}
+              >
+                <Trans>Add myself (fills at setup)</Trans>
+              </Button>
             </div>
 
             {!alwaysShowAdvancedSettings && organisation.organisationClaim.flags.cfr21 && (

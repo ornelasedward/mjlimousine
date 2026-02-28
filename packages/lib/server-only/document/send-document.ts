@@ -77,6 +77,11 @@ export const sendDocument = async ({
       },
       fields: true,
       documentMeta: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
       envelopeItems: {
         select: {
           id: true,
@@ -152,9 +157,49 @@ export const sendDocument = async ({
     }
   });
 
+  // Pre-identify potential owner auto-complete recipients so we can exclude them from the
+  // signature field validation below. These are owner-recipients with only pre-fillable fields.
+  const potentialAutoCompleteRecipientIds = new Set<number>();
+
+  if (envelope.user?.email && envelope.internalVersion === 2) {
+    const ownerEmailLower = envelope.user.email.toLowerCase();
+
+    for (const recipient of envelope.recipients) {
+      if (recipient.email.toLowerCase() !== ownerEmailLower) continue;
+      if (recipient.signingStatus === SigningStatus.SIGNED) continue;
+
+      const recipientFields = envelope.fields.filter((f) => f.recipientId === recipient.id);
+      if (recipientFields.length === 0) continue;
+
+      // Skip if any signature fields are present - those cannot be auto-completed.
+      const hasSignatureFields = recipientFields.some(
+        (f) =>
+          f.type === FieldType.SIGNATURE ||
+          f.type === FieldType.FREE_SIGNATURE ||
+          f.type === FieldType.INITIALS,
+      );
+
+      if (!hasSignatureFields) {
+        // Check that all fields have pre-fill values via extractFieldAutoInsertValues.
+        const allHavePreFill = recipientFields.every((f) => {
+          try {
+            return extractFieldAutoInsertValues(f) !== null;
+          } catch {
+            return false;
+          }
+        });
+
+        if (allHavePreFill) {
+          potentialAutoCompleteRecipientIds.add(recipient.id);
+        }
+      }
+    }
+  }
+
   // Validate that recipients who require fields (e.g., signers need signature fields) have them.
+  // Exclude owner-auto-complete recipients from this check since they will be auto-signed.
   const recipientsWithMissingFields = getRecipientsWithMissingFields(
-    envelope.recipients,
+    envelope.recipients.filter((r) => !potentialAutoCompleteRecipientIds.has(r.id)),
     envelope.fields,
   );
 
@@ -214,6 +259,46 @@ export const sendDocument = async ({
     }
   }
 
+  // Identify recipients whose fields should be auto-completed (owner-recipient pattern).
+  // This applies when the document owner has added themselves as a signer and all their
+  // fields have pre-filled values (no signature fields required).
+  const ownerEmail = envelope.user?.email;
+  const autoCompleteRecipientIds = new Set<number>();
+
+  if (ownerEmail && envelope.internalVersion === 2) {
+    for (const recipient of envelope.recipients) {
+      if (recipient.email.toLowerCase() !== ownerEmail.toLowerCase()) continue;
+      if (recipient.signingStatus === SigningStatus.SIGNED) continue;
+
+      const recipientFields = envelope.fields.filter((f) => f.recipientId === recipient.id);
+      if (recipientFields.length === 0) continue;
+
+      // Check if this recipient has any signature fields (which cannot be auto-completed).
+      const hasSignatureFields = recipientFields.some(
+        (f) =>
+          f.type === FieldType.SIGNATURE ||
+          f.type === FieldType.FREE_SIGNATURE ||
+          f.type === FieldType.INITIALS,
+      );
+
+      if (hasSignatureFields) continue;
+
+      // Check if ALL fields for this recipient have auto-insert values.
+      const allFieldsAutoInserted = recipientFields.every((f) =>
+        fieldsToAutoInsert.some((af) => af.fieldId === f.id),
+      );
+
+      if (allFieldsAutoInserted) {
+        autoCompleteRecipientIds.add(recipient.id);
+      }
+    }
+  }
+
+  // Exclude auto-complete recipients from signing notifications.
+  recipientsToNotify = recipientsToNotify.filter(
+    (r) => !autoCompleteRecipientIds.has(r.id),
+  );
+
   const updatedEnvelope = await prisma.$transaction(async (tx) => {
     if (envelope.status === DocumentStatus.DRAFT) {
       await tx.documentAuditLog.create({
@@ -256,6 +341,20 @@ export const sendDocument = async ({
           // Don't put metadata or user here since it's a system event.
         }),
       });
+
+      // Auto-complete owner recipients who have all fields pre-filled and no signature fields.
+      if (autoCompleteRecipientIds.size > 0) {
+        await tx.recipient.updateMany({
+          where: {
+            id: { in: Array.from(autoCompleteRecipientIds) },
+          },
+          data: {
+            signingStatus: SigningStatus.SIGNED,
+            signedAt: new Date(),
+            sendStatus: SendStatus.SENT,
+          },
+        });
+      }
     }
 
     const expiresAt = resolveExpiresAt(envelope.documentMeta?.envelopeExpirationPeriod ?? null);

@@ -149,6 +149,18 @@ export const FieldContent = ({ field, documentMeta }: FieldIconProps) => {
     );
   }
 
+  if (field.type === FieldType.FILE) {
+    return (
+      <div className="flex h-full w-full items-center justify-center overflow-hidden">
+        <p className="w-full text-center text-[clamp(0.07rem,25cqw,0.825rem)] text-foreground duration-200">
+          {field.inserted
+            ? field.customText || <Trans>File Uploaded</Trans>
+            : fieldMeta?.label || <Trans>Upload File</Trans>}
+        </p>
+      </div>
+    );
+  }
+
   if (
     field.type === FieldType.SIGNATURE &&
     field.signature?.signatureImageAsBase64 &&

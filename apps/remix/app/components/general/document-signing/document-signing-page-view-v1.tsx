@@ -16,6 +16,7 @@ import type { TRecipientAccessAuth } from '@documenso/lib/types/document-auth';
 import {
   ZCheckboxFieldMeta,
   ZDropdownFieldMeta,
+  ZFileFieldMeta,
   ZNumberFieldMeta,
   ZRadioFieldMeta,
   ZTextFieldMeta,
@@ -38,6 +39,7 @@ import { DocumentSigningCheckboxField } from '~/components/general/document-sign
 import { DocumentSigningDateField } from '~/components/general/document-signing/document-signing-date-field';
 import { DocumentSigningDropdownField } from '~/components/general/document-signing/document-signing-dropdown-field';
 import { DocumentSigningEmailField } from '~/components/general/document-signing/document-signing-email-field';
+import { DocumentSigningFileField } from '~/components/general/document-signing/document-signing-file-field';
 import { DocumentSigningForm } from '~/components/general/document-signing/document-signing-form';
 import { DocumentSigningInitialsField } from '~/components/general/document-signing/document-signing-initials-field';
 import { DocumentSigningNameField } from '~/components/general/document-signing/document-signing-name-field';
@@ -471,6 +473,13 @@ export const DocumentSigningPageViewV1 = ({
                     fieldMeta: field.fieldMeta ? ZDropdownFieldMeta.parse(field.fieldMeta) : null,
                   };
                   return <DocumentSigningDropdownField key={field.id} field={fieldWithMeta} />;
+                })
+                .with(FieldType.FILE, () => {
+                  const fieldWithMeta: FieldWithSignatureAndFieldMeta = {
+                    ...field,
+                    fieldMeta: field.fieldMeta ? ZFileFieldMeta.parse(field.fieldMeta) : null,
+                  };
+                  return <DocumentSigningFileField key={field.id} field={fieldWithMeta} />;
                 })
                 .otherwise(() => null),
             )}
