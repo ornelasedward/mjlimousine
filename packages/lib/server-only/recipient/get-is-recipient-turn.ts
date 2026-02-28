@@ -26,23 +26,6 @@ export async function getIsRecipientsTurnToSign({ token }: GetIsRecipientTurnOpt
     },
   });
 
-  if (envelope.documentMeta?.signingOrder !== DocumentSigningOrder.SEQUENTIAL) {
-    return true;
-  }
-
-  const { recipients } = envelope;
-
-  const currentRecipientIndex = recipients.findIndex((r) => r.token === token);
-
-  if (currentRecipientIndex === -1) {
-    return false;
-  }
-
-  for (let i = 0; i < currentRecipientIndex; i++) {
-    if (recipients[i].signingStatus !== SigningStatus.SIGNED) {
-      return false;
-    }
-  }
-
+  // Always allow parallel signing — sequential signing order is not used.
   return true;
 }
