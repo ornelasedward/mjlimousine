@@ -34,6 +34,7 @@ import {
 
 import { DocumentDeleteDialog } from '~/components/dialogs/document-delete-dialog';
 import { DocumentDuplicateDialog } from '~/components/dialogs/document-duplicate-dialog';
+import { DocumentEditRecipientDialog } from '~/components/dialogs/document-edit-recipient-dialog';
 import { DocumentResendDialog } from '~/components/dialogs/document-resend-dialog';
 import { DocumentRecipientLinkCopyDialog } from '~/components/general/document/document-recipient-link-copy-dialog';
 import { useCurrentTeam } from '~/providers/team';
@@ -177,6 +178,10 @@ export const DocumentsTableActionDropdown = ({
         )}
 
         <DocumentResendDialog document={row} recipients={nonSignedRecipients} />
+
+        {canManageDocument && (
+          <DocumentEditRecipientDialog document={row} recipients={nonSignedRecipients} />
+        )}
 
         <DocumentShareButton
           documentId={row.id}
