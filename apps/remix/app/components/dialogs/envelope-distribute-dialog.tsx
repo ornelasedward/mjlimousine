@@ -59,6 +59,7 @@ export type EnvelopeDistributeDialogProps = {
 };
 
 export const ZEnvelopeDistributeFormSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(255),
   meta: z.object({
     emailId: z.string().nullable(),
     emailReplyTo: z.preprocess(
@@ -99,9 +100,11 @@ export const EnvelopeDistributeDialog = ({
   const [isSyncing, setIsSyncing] = useState(false);
 
   const { mutateAsync: distributeEnvelope } = trpcReact.envelope.distribute.useMutation();
+  const { mutateAsync: updateEnvelopeTitle } = trpcReact.envelope.update.useMutation();
 
   const form = useForm<TEnvelopeDistributeFormSchema>({
     defaultValues: {
+      title: envelope.title,
       meta: {
         emailId: envelope.documentMeta?.emailId ?? null,
         emailReplyTo: envelope.documentMeta?.emailReplyTo || undefined,
@@ -180,8 +183,12 @@ export const EnvelopeDistributeDialog = ({
     return null;
   }, [envelope.recipients, recipientsMissingRequiredEmail, recipientsMissingSignatureFields]);
 
-  const onFormSubmit = async ({ meta }: TEnvelopeDistributeFormSchema) => {
+  const onFormSubmit = async ({ title, meta }: TEnvelopeDistributeFormSchema) => {
     try {
+      if (title !== envelope.title) {
+        await updateEnvelopeTitle({ envelopeId: envelope.id, data: { title } });
+      }
+
       await distributeEnvelope({ envelopeId: envelope.id, meta });
 
       await onDistribute?.();
@@ -257,6 +264,26 @@ export const EnvelopeDistributeDialog = ({
           <Form {...form}>
             <form onSubmit={handleSubmit(onFormSubmit)}>
               <fieldset disabled={isSubmitting}>
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="mb-4">
+                      <FormLabel>
+                        <Trans>Document Title</Trans>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="e.g. Quince March 14th, 2026 – Kyle Fleming"
+                          maxLength={255}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <Tabs
                   onValueChange={(value) =>
                     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

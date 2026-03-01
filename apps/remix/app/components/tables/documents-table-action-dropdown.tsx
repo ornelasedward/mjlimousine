@@ -15,6 +15,7 @@ import {
   MoreHorizontal,
   Pencil,
   Share,
+  Tag,
   Trash2,
 } from 'lucide-react';
 import { Link } from 'react-router';
@@ -23,7 +24,16 @@ import { useSession } from '@documenso/lib/client-only/providers/session';
 import type { TDocumentMany as TDocumentRow } from '@documenso/lib/types/document';
 import { isDocumentCompleted } from '@documenso/lib/utils/document';
 import { formatDocumentsPath } from '@documenso/lib/utils/teams';
+import { trpc } from '@documenso/trpc/react';
 import { DocumentShareButton } from '@documenso/ui/components/document/document-share-button';
+import { Button } from '@documenso/ui/primitives/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@documenso/ui/primitives/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +41,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@documenso/ui/primitives/dropdown-menu';
+import { Input } from '@documenso/ui/primitives/input';
+import { useToast } from '@documenso/ui/primitives/use-toast';
 
 import { DocumentDeleteDialog } from '~/components/dialogs/document-delete-dialog';
 import { DocumentDuplicateDialog } from '~/components/dialogs/document-duplicate-dialog';
@@ -57,6 +69,13 @@ export const DocumentsTableActionDropdown = ({
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDuplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+  const [isRenameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [renameTitle, setRenameTitle] = useState(row.title);
+
+  const { toast } = useToast();
+
+  const { mutateAsync: updateEnvelope, isPending: isRenaming } =
+    trpc.envelope.update.useMutation();
 
   const recipient = row.recipients.find((recipient) => recipient.email === user.email);
 
@@ -121,6 +140,19 @@ export const DocumentsTableActionDropdown = ({
             <Trans>Edit</Trans>
           </Link>
         </DropdownMenuItem>
+
+        {canManageDocument && (
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              setRenameTitle(row.title);
+              setRenameDialogOpen(true);
+            }}
+          >
+            <Tag className="mr-2 h-4 w-4" />
+            <Trans>Rename</Trans>
+          </DropdownMenuItem>
+        )}
 
         <EnvelopeDownloadDialog
           envelopeId={row.envelopeId}
@@ -212,6 +244,51 @@ export const DocumentsTableActionDropdown = ({
         open={isDuplicateDialogOpen}
         onOpenChange={setDuplicateDialogOpen}
       />
+
+      <Dialog open={isRenameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <Trans>Rename Document</Trans>
+            </DialogTitle>
+          </DialogHeader>
+
+          <Input
+            value={renameTitle}
+            onChange={(e) => setRenameTitle(e.target.value)}
+            placeholder="e.g. Quince March 14th, 2026 – Kyle Fleming"
+            maxLength={255}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                void handleRename();
+              }
+            }}
+          />
+
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setRenameDialogOpen(false)}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button loading={isRenaming} onClick={() => void handleRename()}>
+              <Trans>Save</Trans>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DropdownMenu>
   );
+
+  async function handleRename() {
+    if (!renameTitle.trim()) return;
+
+    try {
+      await updateEnvelope({ envelopeId: row.envelopeId, data: { title: renameTitle.trim() } });
+
+      toast({ title: 'Document renamed successfully', duration: 3000 });
+      setRenameDialogOpen(false);
+      window.location.reload();
+    } catch {
+      toast({ title: 'Failed to rename document', variant: 'destructive', duration: 5000 });
+    }
+  }
 };
