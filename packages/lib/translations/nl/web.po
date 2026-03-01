@@ -586,8 +586,8 @@ msgid "<0>{organisationName}</0> has requested to create an account on your beha
 msgstr "<0>{organisationName}</0> heeft verzocht om een account voor je aan te maken."
 
 #: packages/email/templates/organisation-account-link-confirmation.tsx
-msgid "<0>{organisationName}</0> has requested to link your current Documenso account to their organisation."
-msgstr "<0>{organisationName}</0> heeft verzocht om je huidige Documenso-account aan hun organisatie te koppelen."
+msgid "<0>{organisationName}</0> has requested to link your current MJ Limousine account to their organisation."
+msgstr ""
 
 #: apps/remix/app/components/general/document-signing/document-signing-page-view-v1.tsx
 msgid "<0>{senderName} {senderEmail}</0> has invited you to approve this document"
@@ -626,8 +626,8 @@ msgid "<0>{senderName} {senderEmail}</0> on behalf of \"{0}\" has invited you to
 msgstr "<0>{senderName} {senderEmail}</0> namens \"{0}\" heeft je uitgenodigd om dit document te bekijken"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "<0>{teamName}</0> has requested to use your email address for their team on Documenso."
-msgstr "<0>{teamName}</0> heeft verzocht om je e-mailadres te gebruiken voor hun team op Documenso."
+msgid "<0>{teamName}</0> has requested to use your email address for their team on MJ Limousine."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
@@ -835,6 +835,10 @@ msgstr "6 maanden"
 msgid "7 days"
 msgstr "7 dagen"
 
+#: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
+msgid "A \"Pay Invoice\" button linking to this URL will appear in the completion email sent after signing."
+msgstr ""
+
 #: apps/remix/app/components/forms/send-confirmation-email.tsx
 msgid "A confirmation email has been sent, and it should arrive in your inbox shortly."
 msgstr "Er is een bevestigingsmail verzonden; deze zou binnenkort in je inbox moeten verschijnen."
@@ -871,8 +875,8 @@ msgid "A means to print or download documents for your records"
 msgstr "Een manier om documenten voor je administratie te printen of te downloaden"
 
 #: packages/email/templates/organisation-join.tsx
-msgid "A member has joined your organisation on Documenso"
-msgstr "Een lid is toegetreden tot je organisatie op Documenso"
+msgid "A member has joined your organisation on MJ Limousine"
+msgstr ""
 
 #: packages/lib/jobs/definitions/emails/send-organisation-member-left-email.handler.ts
 msgid "A member has left your organisation"
@@ -883,8 +887,8 @@ msgid "A member has left your organisation {organisationName}"
 msgstr "Een lid heeft je organisatie {organisationName} verlaten"
 
 #: packages/email/templates/organisation-leave.tsx
-msgid "A member has left your organisation on Documenso"
-msgstr "Een lid heeft je organisatie op Documenso verlaten"
+msgid "A member has left your organisation on MJ Limousine"
+msgstr ""
 
 #: packages/lib/jobs/definitions/emails/send-organisation-member-joined-email.handler.ts
 msgid "A new member has joined your organisation"
@@ -923,8 +927,8 @@ msgid "A request has been made to create an account for you"
 msgstr "Er is een verzoek ingediend om een account voor je aan te maken"
 
 #: packages/email/templates/organisation-account-link-confirmation.tsx
-msgid "A request has been made to link your Documenso account"
-msgstr "Er is een verzoek ingediend om je Documenso-account te koppelen"
+msgid "A request has been made to link your MJ Limousine account"
+msgstr ""
 
 #. placeholder {0}: team.name
 #: packages/lib/server-only/team/create-team-email-verification.ts
@@ -933,8 +937,8 @@ msgstr "Er is een verzoek ingediend door {0} op Documenso om je e-mailadres te g
 
 #: apps/remix/app/components/dialogs/webhook-create-dialog.tsx
 #: apps/remix/app/components/dialogs/webhook-edit-dialog.tsx
-msgid "A secret that will be sent to your URL so you can verify that the request has been sent by Documenso."
-msgstr "Een geheim dat naar je URL wordt verzonden, zodat je kunt verifiëren dat het verzoek door Documenso is verzonden."
+msgid "A secret that will be sent to your URL so you can verify that the request has been sent by MJ Limousine."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
 msgid "A stable internet connection"
@@ -977,12 +981,12 @@ msgid "Accept & Link Account"
 msgstr "Accepteren & account koppelen"
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Accept invitation to join an organisation on Documenso"
-msgstr "Uitnodiging accepteren om toe te treden tot een organisatie op Documenso"
+msgid "Accept invitation to join an organisation on MJ Limousine"
+msgstr ""
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "Accept team email request for {teamName} on Documenso"
-msgstr "Team-e-mailverzoek voor {teamName} op Documenso accepteren"
+msgid "Accept team email request for {teamName} on MJ Limousine"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
 msgid "Acceptance and Consent"
@@ -1120,7 +1124,6 @@ msgid "Add"
 msgstr "Toevoegen"
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-recipient-form.tsx
-#: packages/ui/primitives/document-flow/add-signers.tsx
 msgid "Add 2 or more signers to enable signing order."
 msgstr "Voeg 2 of meer ondertekenaars toe om ondertekeningsvolgorde in te schakelen."
 
@@ -1248,6 +1251,10 @@ msgstr "Mijzelf toevoegen"
 #: packages/ui/primitives/template-flow/add-template-placeholder-recipients.tsx
 msgid "Add Myself"
 msgstr "Mijzelf toevoegen"
+
+#: packages/ui/primitives/document-flow/add-signers.tsx
+msgid "Add myself (fills at setup)"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/organisation-email-create-dialog.tsx
 msgid "Add Organisation Email"
@@ -1466,7 +1473,6 @@ msgstr "Sta documentontvangers toe direct op dit e-mailadres te antwoorden."
 
 #: apps/remix/app/components/embed/authoring/configure-document-recipients.tsx
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-recipient-form.tsx
-#: packages/ui/primitives/document-flow/add-signers.tsx
 #: packages/ui/primitives/template-flow/add-template-placeholder-recipients.tsx
 msgid "Allow signers to dictate next signer"
 msgstr "Ondertekenaars toestaan de volgende ondertekenaar te bepalen"
@@ -1656,6 +1662,10 @@ msgstr "Er is een fout opgetreden bij het afwijzen van het document. Probeer het
 msgid "An error occurred while removing the field."
 msgstr "Er is een fout opgetreden bij het verwijderen van het veld."
 
+#: apps/remix/app/components/general/document-signing/document-signing-file-field.tsx
+msgid "An error occurred while removing the file."
+msgstr ""
+
 #: apps/remix/app/components/general/document-signing/document-signing-radio-field.tsx
 msgid "An error occurred while removing the selection."
 msgstr "Er is een fout opgetreden tijdens het verwijderen van de selectie."
@@ -1723,6 +1733,14 @@ msgstr "Er is een fout opgetreden bij het bijwerken van de handtekening."
 #: apps/remix/app/routes/_authenticated+/admin+/users.$id.tsx
 msgid "An error occurred while updating your profile."
 msgstr "Er is een fout opgetreden bij het bijwerken van je profiel."
+
+#: apps/remix/app/components/general/document-signing/document-signing-file-field.tsx
+msgid "An error occurred while uploading as assistant."
+msgstr ""
+
+#: apps/remix/app/components/general/document-signing/document-signing-file-field.tsx
+msgid "An error occurred while uploading the file."
+msgstr ""
 
 #: apps/remix/app/components/general/document/document-upload-button-legacy.tsx
 #: apps/remix/app/components/general/envelope/envelope-upload-button.tsx
@@ -2211,8 +2229,8 @@ msgid "By enabling 2FA, you will be required to enter a code from your authentic
 msgstr "Door 2FA in te schakelen, moet je elke keer dat je inlogt met e-mail en wachtwoord een code uit je authenticator-app invoeren."
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
-msgid "By proceeding to use the electronic signature service provided by Documenso, you affirm that you have read and understood this disclosure. You agree to all terms and conditions related to the use of electronic signatures and electronic transactions as outlined herein."
-msgstr "Door gebruik te maken van de elektronische ondertekeningsdienst van Documenso bevestig je dat je deze kennisgeving hebt gelezen en begrepen. Je gaat akkoord met alle voorwaarden die hier zijn uiteengezet met betrekking tot het gebruik van elektronische handtekeningen en elektronische transacties."
+msgid "By proceeding to use the electronic signature service provided by MJ Limousine, you affirm that you have read and understood this disclosure. You agree to all terms and conditions related to the use of electronic signatures and electronic transactions as outlined herein."
+msgstr ""
 
 #: apps/remix/app/components/general/document-signing/document-signing-disclosure.tsx
 msgid "By proceeding with your electronic signature, you acknowledge and consent that it will be used to sign the given document and holds the same legal validity as a handwritten signature. By completing the electronic signing process, you affirm your understanding and acceptance of these conditions."
@@ -2244,6 +2262,7 @@ msgstr "Kunt u niemand vinden?"
 #: apps/remix/app/components/dialogs/claim-update-dialog.tsx
 #: apps/remix/app/components/dialogs/document-delete-dialog.tsx
 #: apps/remix/app/components/dialogs/document-duplicate-dialog.tsx
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
 #: apps/remix/app/components/dialogs/document-move-to-folder-dialog.tsx
 #: apps/remix/app/components/dialogs/document-resend-dialog.tsx
 #: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
@@ -2276,6 +2295,7 @@ msgstr "Kunt u niemand vinden?"
 #: apps/remix/app/components/dialogs/session-logout-all-dialog.tsx
 #: apps/remix/app/components/dialogs/sign-field-checkbox-dialog.tsx
 #: apps/remix/app/components/dialogs/sign-field-email-dialog.tsx
+#: apps/remix/app/components/dialogs/sign-field-file-dialog.tsx
 #: apps/remix/app/components/dialogs/sign-field-initials-dialog.tsx
 #: apps/remix/app/components/dialogs/sign-field-name-dialog.tsx
 #: apps/remix/app/components/dialogs/sign-field-number-dialog.tsx
@@ -2322,6 +2342,7 @@ msgstr "Kunt u niemand vinden?"
 #: apps/remix/app/components/general/document/document-attachments-popover.tsx
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
 #: apps/remix/app/components/general/teams/team-email-usage.tsx
+#: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
 #: apps/remix/app/components/tables/settings-security-passkey-table-actions.tsx
 #: apps/remix/app/components/tables/settings-security-passkey-table-actions.tsx
 #: apps/remix/app/routes/_authenticated+/admin+/email-domains.$id.tsx
@@ -2378,9 +2399,17 @@ msgstr "Ccers"
 msgid "Center"
 msgstr "Centreren"
 
+#: apps/remix/app/components/general/app-command-menu.tsx
+msgid "Change language"
+msgstr ""
+
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-fields-page-renderer.tsx
 msgid "Change Recipient"
 msgstr "Ontvanger wijzigen"
+
+#: apps/remix/app/components/general/app-command-menu.tsx
+msgid "Change theme"
+msgstr ""
 
 #: apps/remix/app/components/forms/editor/editor-field-text-form.tsx
 msgid "Character limit"
@@ -2422,6 +2451,10 @@ msgstr "Waarden selectievakje"
 #: apps/remix/app/components/general/billing-plans.tsx
 msgid "Checkout"
 msgstr "Afrekenen"
+
+#: packages/lib/constants/i18n.ts
+msgid "Chinese"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/template-direct-link-dialog.tsx
 msgid "Choose an existing recipient from below to continue"
@@ -2498,6 +2531,10 @@ msgstr "Klik om de ondertekeningslink te kopiëren om naar de ontvanger te sture
 #: apps/remix/app/components/general/envelope-signing/envelope-signer-page-renderer.tsx
 msgid "Click to insert field"
 msgstr "Klik om veld in te voegen"
+
+#: apps/remix/app/components/dialogs/sign-field-file-dialog.tsx
+msgid "Click to select a file"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "Client ID"
@@ -2602,6 +2639,14 @@ msgstr "Voltooide documenten"
 msgid "Completed on {formattedDate}"
 msgstr "Voltooid op {formattedDate}"
 
+#: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
+msgid "Completion Email Message <0>(Optional)</0>"
+msgstr ""
+
+#: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
+msgid "Completion Email Subject <0>(Optional)</0>"
+msgstr ""
+
 #: packages/ui/components/pdf-viewer/pdf-viewer-konva.tsx
 #: packages/ui/components/pdf-viewer/pdf-viewer-konva.tsx
 #: packages/ui/components/pdf-viewer/pdf-viewer-konva.tsx
@@ -2630,8 +2675,8 @@ msgid "Configure document settings and options before sending."
 msgstr "Configureer documentinstellingen en opties voordat je verzendt."
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
-msgid "Configure email settings for the document"
-msgstr "E-mailinstellingen voor het document configureren"
+msgid "Configure email settings for the document."
+msgstr ""
 
 #: apps/remix/app/components/embed/authoring/configure-fields-view.tsx
 #: apps/remix/app/components/embed/authoring/configure-fields-view.tsx
@@ -2648,8 +2693,8 @@ msgid "Configure general settings for the template."
 msgstr "Configureer algemene instellingen voor de sjabloon."
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
-msgid "Configure security settings for the document"
-msgstr "Beveiligingsinstellingen voor het document configureren"
+msgid "Configure security settings for the document."
+msgstr ""
 
 #: apps/remix/app/components/dialogs/public-profile-template-manage-dialog.tsx
 msgid "Configure template"
@@ -2879,6 +2924,10 @@ msgstr "Token kopiëren"
 msgid "Copy Value"
 msgstr "Waarde kopiëren"
 
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "Could not update the recipient. Please try again."
+msgstr ""
+
 #: apps/remix/app/components/dialogs/admin-organisation-create-dialog.tsx
 #: apps/remix/app/components/dialogs/folder-create-dialog.tsx
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
@@ -3057,10 +3106,6 @@ msgstr "Webhook aanmaken"
 #: apps/remix/app/components/dialogs/webhook-create-dialog.tsx
 msgid "Create Webhook"
 msgstr "Webhook aanmaken"
-
-#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
-msgid "Create your account and start using state-of-the-art document signing."
-msgstr "Maak je account aan en begin met het gebruik van moderne documentenondertekening."
 
 #: apps/remix/app/components/forms/signup.tsx
 msgid "Create your account and start using state-of-the-art document signing. Open and beautiful signing is within your grasp."
@@ -3630,14 +3675,6 @@ msgstr "Wil je deze sjabloon verwijderen?"
 msgid "Do you want to duplicate this template?"
 msgstr "Wil je deze sjabloon dupliceren?"
 
-#: apps/remix/app/components/general/admin-license-card.tsx
-msgid "Documenso License"
-msgstr "Documenso-licentie"
-
-#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-msgid "Documenso will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
-msgstr "Documenso verwijdert <0>al je documenten</0>, samen met al je voltooide documenten, handtekeningen en alle andere bronnen die bij je account horen."
-
 #: apps/remix/app/components/general/settings-nav-desktop.tsx
 #: apps/remix/app/components/general/template/template-page-view-documents-table.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings._layout.tsx
@@ -3911,6 +3948,7 @@ msgstr "Documentstatus"
 msgid "Document title"
 msgstr "Documenttitel"
 
+#: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-upload-page.tsx
 msgid "Document Title"
 msgstr "Documenttitel"
@@ -4187,6 +4225,10 @@ msgstr "Sjabloon dupliceren"
 msgid "Duplicate values are not allowed"
 msgstr "Dubbele waarden zijn niet toegestaan"
 
+#: packages/lib/constants/i18n.ts
+msgid "Dutch"
+msgstr ""
+
 #: packages/ui/primitives/document-flow/field-items-advanced-settings/number-field.tsx
 msgid "E.g. 0"
 msgstr "Bijv. 0"
@@ -4207,6 +4249,14 @@ msgstr "Bijv. 100"
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings.webhooks.$id._index.tsx
 msgid "Edit"
 msgstr "Bewerken"
+
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "Edit Recipient"
+msgstr ""
+
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "Edit Recipient Email"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates.$id._index.tsx
 msgid "Edit Template"
@@ -4494,7 +4544,6 @@ msgstr "Ondertekenen via directe link inschakelen"
 
 #: apps/remix/app/components/embed/authoring/configure-document-recipients.tsx
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-recipient-form.tsx
-#: packages/ui/primitives/document-flow/add-signers.tsx
 #: packages/ui/primitives/template-flow/add-template-placeholder-recipients.tsx
 msgid "Enable signing order"
 msgstr "Ondertekeningsvolgorde inschakelen"
@@ -4527,6 +4576,10 @@ msgstr "Bijgevoegd document"
 #: packages/lib/server-only/pdf/render-audit-logs.ts
 msgid "Enclosed Documents"
 msgstr "Bijgevoegde documenten"
+
+#: packages/lib/constants/i18n.ts
+msgid "English"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/sign-field-email-dialog.tsx
 #: apps/remix/app/components/dialogs/sign-field-initials-dialog.tsx
@@ -4689,6 +4742,8 @@ msgstr "Envelope bijgewerkt"
 #: apps/remix/app/components/general/document-signing/document-signing-dropdown-field.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-email-field.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-email-field.tsx
+#: apps/remix/app/components/general/document-signing/document-signing-file-field.tsx
+#: apps/remix/app/components/general/document-signing/document-signing-file-field.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-form.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-initials-field.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-initials-field.tsx
@@ -5003,6 +5058,27 @@ msgstr "Bestand is te klein"
 msgid "File size exceeds the limit of {APP_DOCUMENT_UPLOAD_SIZE_LIMIT} MB"
 msgstr "Bestandsgrootte overschrijdt de limiet van {APP_DOCUMENT_UPLOAD_SIZE_LIMIT} MB"
 
+#: apps/remix/app/components/dialogs/sign-field-file-dialog.tsx
+msgid "File size must be less than {maxSizeMB}MB"
+msgstr ""
+
+#: apps/remix/app/components/general/envelope-editor/envelope-editor-fields-drag-drop.tsx
+#: packages/lib/utils/fields.ts
+#: packages/ui/primitives/document-flow/add-fields.tsx
+#: packages/ui/primitives/document-flow/types.ts
+#: packages/ui/primitives/template-flow/add-template-fields.tsx
+msgid "File Upload"
+msgstr ""
+
+#: apps/remix/app/components/general/envelope-editor/envelope-editor-fields-page.tsx
+msgid "File Upload Settings"
+msgstr ""
+
+#: apps/remix/app/components/general/document-signing/document-signing-file-field.tsx
+#: packages/ui/primitives/document-flow/field-content.tsx
+msgid "File Uploaded"
+msgstr ""
+
 #: apps/remix/app/components/dialogs/claim-create-dialog.tsx
 msgid "Fill in the details to create a new subscription claim."
 msgstr "Vul de gegevens in om een nieuwe abonnementsclaim aan te maken."
@@ -5099,6 +5175,10 @@ msgstr "Vrije handtekening"
 msgid "Free Signature Settings"
 msgstr "Gratis handtekening-instellingen"
 
+#: packages/lib/constants/i18n.ts
+msgid "French"
+msgstr ""
+
 #: apps/remix/app/components/embed/embed-direct-template-client-page.tsx
 #: apps/remix/app/components/embed/embed-document-signing-page-v1.tsx
 #: apps/remix/app/components/embed/multisign/multi-sign-document-signing-view.tsx
@@ -5130,6 +5210,10 @@ msgstr "DKIM-records genereren"
 #: packages/ui/primitives/document-flow/add-subject.tsx
 msgid "Generate Links"
 msgstr "Links genereren"
+
+#: packages/lib/constants/i18n.ts
+msgid "German"
+msgstr ""
 
 #: packages/ui/components/document/document-global-auth-action-select.tsx
 msgid "Global recipient action authentication"
@@ -5166,7 +5250,6 @@ msgstr "Terug naar home"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
-#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
 msgid "Go Back Home"
 msgstr "Terug naar home"
 
@@ -5413,6 +5496,10 @@ msgstr "Invoervelden identificeren"
 msgid "Identifying recipients"
 msgstr "Ontvangers identificeren"
 
+#: packages/ui/primitives/document-flow/add-subject.tsx
+msgid "If set, a button linking to this URL will be included in the completion email sent to signers after they sign."
+msgstr ""
+
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 msgid "If there is any issue with your subscription, please contact us at <0>{SUPPORT_EMAIL}</0>."
 msgstr "Als er een probleem is met je abonnement, neem dan contact met ons op via <0>{SUPPORT_EMAIL}</0>."
@@ -5432,6 +5519,10 @@ msgstr "Als je de bevestigingslink niet in je inbox vindt, kun je hieronder een 
 #: apps/remix/app/components/forms/2fa/enable-authenticator-app-dialog.tsx
 msgid "If your authenticator app does not support QR codes, you can use the following code instead:"
 msgstr "Als je authenticator‑app geen QR‑codes ondersteunt, kun je in plaats daarvan de volgende code gebruiken:"
+
+#: apps/remix/app/components/dialogs/sign-field-file-dialog.tsx
+msgid "Images or PDF, up to {maxSizeMB}MB"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "Important: What This Means"
@@ -5550,8 +5641,8 @@ msgid "Invalid License Key"
 msgstr "Ongeldige licentiesleutel"
 
 #: apps/remix/app/components/general/admin-license-status-banner.tsx
-msgid "Invalid License Type - Your Documenso instance is using features that are not part of your license."
-msgstr "Ongeldig licentietype - Je Documenso-instantie gebruikt functies die niet onder je licentie vallen."
+msgid "Invalid License Type - Your MJ Limousine instance is using features that are not part of your license."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "Invalid link"
@@ -5624,6 +5715,14 @@ msgstr "Uitgenodigd op"
 msgid "Invoice"
 msgstr "Factuur"
 
+#: packages/ui/primitives/document-flow/add-subject.tsx
+msgid "Invoice / Follow-up Link <0>(Optional)</0>"
+msgstr ""
+
+#: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
+msgid "Invoice Payment Link <0>(Optional)</0>"
+msgstr ""
+
 #: apps/remix/app/components/tables/admin-document-logs-table.tsx
 #: apps/remix/app/components/tables/document-logs-table.tsx
 #: apps/remix/app/components/tables/internal-audit-log-table.tsx
@@ -5668,9 +5767,17 @@ msgstr "Het is momenteel niet jouw beurt om te ondertekenen. Kom binnenkort teru
 msgid "It's currently not your turn to sign. You will receive an email with instructions once it's your turn to sign the document."
 msgstr "Het is momenteel niet jouw beurt om te ondertekenen. Je ontvangt een e‑mail met instructies zodra jij aan de beurt bent om het document te ondertekenen."
 
+#: packages/lib/constants/i18n.ts
+msgid "Italian"
+msgstr ""
+
+#: packages/lib/constants/i18n.ts
+msgid "Japanese"
+msgstr ""
+
 #: packages/email/templates/organisation-invite.tsx
-msgid "Join {organisationName} on Documenso"
-msgstr "Word lid van {organisationName} op Documenso"
+msgid "Join {organisationName} on MJ Limousine"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
 msgid "Join our community on <0>Discord</0> for community support and discussion."
@@ -5684,6 +5791,10 @@ msgstr "Lid geworden"
 #: apps/remix/app/routes/_authenticated+/dashboard.tsx
 msgid "Joined {0}"
 msgstr "Toegetreden {0}"
+
+#: packages/lib/constants/i18n.ts
+msgid "Korean"
+msgstr ""
 
 #: apps/remix/app/components/forms/editor/editor-field-generic-field-forms.tsx
 #: apps/remix/app/components/forms/editor/editor-field-text-form.tsx
@@ -5854,8 +5965,8 @@ msgid "Link template"
 msgstr "Sjabloon koppelen"
 
 #: packages/email/templates/organisation-account-link-confirmation.tsx
-msgid "Link your Documenso account"
-msgstr "Koppel uw Documenso-account"
+msgid "Link your MJ Limousine account"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/settings+/security._index.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.linked-accounts.tsx
@@ -6183,12 +6294,20 @@ msgid "Min"
 msgstr "Min"
 
 #: apps/remix/app/components/general/admin-license-status-banner.tsx
-msgid "Missing License - Your Documenso instance is using features that require a license."
-msgstr "Licentie ontbreekt - Je Documenso-instantie gebruikt functies waarvoor een licentie vereist is."
+msgid "Missing License - Your MJ Limousine instance is using features that require a license."
+msgstr ""
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-fields-page.tsx
 msgid "Missing Recipients"
 msgstr "Ontbrekende ontvangers"
+
+#: apps/remix/app/components/general/admin-license-card.tsx
+msgid "MJ Limousine License"
+msgstr ""
+
+#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
+msgid "MJ Limousine will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
+msgstr ""
 
 #: apps/remix/app/components/general/document/document-page-view-recipients.tsx
 #: apps/remix/app/components/general/template/template-page-view-recipients.tsx
@@ -6272,6 +6391,7 @@ msgstr "n.v.t."
 
 #: apps/remix/app/components/dialogs/ai-field-detection-dialog.tsx
 #: apps/remix/app/components/dialogs/assistant-confirmation-dialog.tsx
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
 #: apps/remix/app/components/dialogs/folder-update-dialog.tsx
 #: apps/remix/app/components/dialogs/team-email-add-dialog.tsx
 #: apps/remix/app/components/dialogs/team-email-update-dialog.tsx
@@ -6314,10 +6434,6 @@ msgstr "Naam is verplicht"
 msgid "Name Settings"
 msgstr "Naam-instellingen"
 
-#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
-msgid "Need to sign documents?"
-msgstr "Moet je documenten ondertekenen?"
-
 #: packages/ui/components/recipient/recipient-role-select.tsx
 msgid "Needs to approve"
 msgstr "Moet goedkeuren"
@@ -6341,6 +6457,10 @@ msgstr "Nooit verlopen"
 #: packages/ui/components/document/expiration-period-picker.tsx
 msgid "Never expires"
 msgstr "Verloopt nooit"
+
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "New Email Address"
+msgstr ""
 
 #: apps/remix/app/components/forms/password.tsx
 msgid "New Password"
@@ -6954,6 +7074,10 @@ msgctxt "Subscription status"
 msgid "Past Due"
 msgstr "Achterstallig"
 
+#: packages/email/template-components/template-document-completed.tsx
+msgid "Pay Invoice"
+msgstr ""
+
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 msgid "Payment overdue"
@@ -7270,6 +7394,18 @@ msgstr "Upload een document om door te gaan"
 msgid "Please upload a logo"
 msgstr "Upload een logo"
 
+#: apps/remix/app/components/dialogs/sign-field-file-dialog.tsx
+msgid "Please upload your file (e.g., government-issued ID)"
+msgstr ""
+
+#: packages/lib/constants/i18n.ts
+msgid "Polish"
+msgstr ""
+
+#: packages/lib/constants/i18n.ts
+msgid "Portuguese (Brazil)"
+msgstr ""
+
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-fields-page.tsx
 #: packages/ui/primitives/document-flow/field-item.tsx
 msgid "Pos X:"
@@ -7445,8 +7581,8 @@ msgid "Read Only"
 msgstr "Alleen-lezen"
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
-msgid "Read our documentation to get started with Documenso."
-msgstr "Lees onze documentatie om aan de slag te gaan met Documenso."
+msgid "Read our documentation to get started with MJ Limousine."
+msgstr ""
 
 #: apps/remix/app/components/general/document-signing/document-signing-disclosure.tsx
 msgid "Read the full <0>signature disclosure</0>."
@@ -7499,6 +7635,7 @@ msgstr "Recente activiteit"
 msgid "Recent documents"
 msgstr "Recente documenten"
 
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
 #: apps/remix/app/components/dialogs/template-direct-link-dialog.tsx
 #: apps/remix/app/components/general/template/template-page-view-documents-table.tsx
 #: apps/remix/app/components/tables/documents-table.tsx
@@ -7543,6 +7680,10 @@ msgstr "E-mail over verlopen ondertekenaar"
 msgid "Recipient failed to validate a 2FA token for the document"
 msgstr "Ontvanger kon een 2FA-token voor het document niet valideren"
 
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "Recipient name"
+msgstr ""
+
 #: packages/lib/utils/document-audit-logs.ts
 msgid "Recipient rejected the document"
 msgstr "Ontvanger heeft het document afgewezen"
@@ -7572,6 +7713,7 @@ msgctxt "Audit log format"
 msgid "Recipient signing window expired"
 msgstr "Ondertekenvenster verlopen"
 
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
 #: apps/remix/app/components/tables/admin-document-recipient-item-table.tsx
 msgid "Recipient updated"
 msgstr "Ontvanger bijgewerkt"
@@ -7764,6 +7906,14 @@ msgstr "Team‑e‑mail verwijderen"
 msgid "Remove team member"
 msgstr "Teamlid verwijderen"
 
+#: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
+msgid "Rename"
+msgstr ""
+
+#: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
+msgid "Rename Document"
+msgstr ""
+
 #: apps/remix/app/components/forms/password.tsx
 #: apps/remix/app/components/forms/reset-password.tsx
 msgid "Repeat Password"
@@ -7937,10 +8087,6 @@ msgstr "Terugkeren"
 msgid "Return Home"
 msgstr "Terug naar startpagina"
 
-#: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
-msgid "Return to Documenso sign in page here"
-msgstr "Ga hier terug naar de Documenso-aanmeldpagina"
-
 #: apps/remix/app/components/general/envelope-editor/envelope-editor.tsx
 msgid "Return to documents"
 msgstr "Terug naar documenten"
@@ -7948,6 +8094,10 @@ msgstr "Terug naar documenten"
 #: apps/remix/app/routes/_unauthenticated+/organisation.decline.$token.tsx
 msgid "Return to Home"
 msgstr "Terug naar home"
+
+#: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
+msgid "Return to MJ Limousine sign in page here"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/check-email.tsx
 #: apps/remix/app/routes/_unauthenticated+/reset-password._index.tsx
@@ -8012,9 +8162,14 @@ msgstr "Rijen per pagina"
 #: apps/remix/app/components/embed/authoring/configure-fields-view.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-number-field.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-text-field.tsx
+#: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
 #: packages/ui/primitives/document-flow/field-item-advanced-settings.tsx
 msgid "Save"
 msgstr "Opslaan"
+
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "Save & Resend"
+msgstr ""
 
 #: packages/lib/client-only/providers/envelope-editor-provider.tsx
 #: packages/lib/client-only/providers/envelope-editor-provider.tsx
@@ -8247,6 +8402,10 @@ msgstr "Selecteer of voer een e-mailadres in"
 #: apps/remix/app/components/general/document-signing/document-signing-auth-passkey.tsx
 msgid "Select passkey"
 msgstr "Passkey selecteren"
+
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "Select recipient"
+msgstr ""
 
 #: apps/remix/app/components/tables/documents-table.tsx
 #: apps/remix/app/components/tables/templates-table.tsx
@@ -8748,6 +8907,7 @@ msgstr "Sommige ondertekenaars hebben geen handtekeningveld toegewezen gekregen.
 
 #: apps/remix/app/components/dialogs/document-delete-dialog.tsx
 #: apps/remix/app/components/dialogs/document-duplicate-dialog.tsx
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
 #: apps/remix/app/components/dialogs/document-resend-dialog.tsx
 #: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
 #: apps/remix/app/components/dialogs/envelope-download-dialog.tsx
@@ -8872,6 +9032,10 @@ msgstr "Bron"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "Space-separated list of domains. Leave empty to allow all domains."
 msgstr "Door spaties gescheiden lijst met domeinen. Laat leeg om alle domeinen toe te staan."
+
+#: packages/lib/constants/i18n.ts
+msgid "Spanish"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings._layout.tsx
 msgid "SSO"
@@ -9146,8 +9310,8 @@ msgid "Team email removed"
 msgstr "Teame-mailadres verwijderd"
 
 #: packages/email/templates/team-email-removed.tsx
-msgid "Team email removed for {teamName} on Documenso"
-msgstr "Teame-mailadres verwijderd voor {teamName} op Documenso"
+msgid "Team email removed for {teamName} on MJ Limousine"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "Team email verification"
@@ -9397,8 +9561,8 @@ msgid "Thank you for completing the signing process."
 msgstr "Bedankt dat je het ondertekeningsproces hebt voltooid."
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
-msgid "Thank you for using Documenso to perform your electronic document signing. The purpose of this disclosure is to inform you about the process, legality, and your rights regarding the use of electronic signatures on our platform. By opting to use an electronic signature, you are agreeing to the terms and conditions outlined below."
-msgstr "Bedankt dat je Documenso gebruikt om je documenten elektronisch te ondertekenen. Het doel van deze kennisgeving is je te informeren over het proces, de rechtsgeldigheid en je rechten met betrekking tot het gebruik van elektronische handtekeningen op ons platform. Door te kiezen voor een elektronische handtekening ga je akkoord met de onderstaande voorwaarden."
+msgid "Thank you for using MJ Limousine to perform your electronic document signing. The purpose of this disclosure is to inform you about the process, legality, and your rights regarding the use of electronic signatures on our platform. By opting to use an electronic signature, you are agreeing to the terms and conditions outlined below."
+msgstr ""
 
 #: packages/email/template-components/template-forgot-password.tsx
 msgid "That's okay, it happens! Click the button below to reset your password."
@@ -9633,6 +9797,10 @@ msgstr "De opgegeven reden voor verwijdering is als volgt:"
 msgid "The recipient can prepare the document for later signers by pre-filling suggest values."
 msgstr "De ontvanger kan het document voorbereiden voor latere ondertekenaars door voorgestelde waarden vooraf in te vullen."
 
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "The recipient email has been updated and the signing link resent."
+msgstr ""
+
 #: apps/remix/app/components/tables/admin-document-recipient-item-table.tsx
 msgid "The recipient has been updated successfully"
 msgstr "De ontvanger is succesvol bijgewerkt"
@@ -9755,8 +9923,8 @@ msgstr "De typen handtekeningen die ontvangers mogen gebruiken bij het onderteke
 
 #: apps/remix/app/components/dialogs/webhook-create-dialog.tsx
 #: apps/remix/app/components/dialogs/webhook-edit-dialog.tsx
-msgid "The URL for Documenso to send webhook events to."
-msgstr "De URL waarnaar Documenso webhook‑gebeurtenissen stuurt."
+msgid "The URL for MJ Limousine to send webhook events to."
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/admin+/users.$id.tsx
 msgid "The user you are looking for may have been removed, renamed or may have never existed."
@@ -9893,8 +10061,8 @@ msgid "This document has been signed by all recipients"
 msgstr "Dit document is door alle ontvangers ondertekend"
 
 #: apps/remix/app/components/general/document/document-certificate-qr-view.tsx
-msgid "This document is available in your Documenso account. You can view more details, recipients, and audit logs there."
-msgstr "Dit document is beschikbaar in je Documenso-account. Je kunt daar meer details, ontvangers en auditlogs bekijken."
+msgid "This document is available in your MJ Limousine account. You can view more details, recipients, and audit logs there."
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id._index.tsx
 msgid "This document is currently a draft and has not been sent"
@@ -9913,8 +10081,8 @@ msgid "This document was created using a direct link."
 msgstr "Dit document is aangemaakt met een directe link."
 
 #: packages/email/template-components/template-footer.tsx
-msgid "This document was sent using <0>Documenso</0>."
-msgstr "Dit document is verzonden met <0>Documenso</0>."
+msgid "This document was sent by MJ Limousine Service."
+msgstr ""
 
 #: apps/remix/app/components/dialogs/envelope-duplicate-dialog.tsx
 msgid "This document will be duplicated."
@@ -9984,6 +10152,10 @@ msgstr "Dit item kan niet worden verwijderd"
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "This link is invalid or has expired. Please contact your team to resend a verification."
 msgstr "Deze link is ongeldig of verlopen. Neem contact op met je team om de verificatie opnieuw te laten verzenden."
+
+#: apps/remix/app/components/dialogs/envelope-distribute-dialog.tsx
+msgid "This message appears in the completion email sent after signing, above the Pay Invoice button."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "This organisation will have administrative control over your account. You can revoke this access later, but they will retain access to any data they've already collected."
@@ -10653,6 +10825,10 @@ msgstr "Teamgroep bijwerken"
 msgid "Update team member"
 msgstr "Teamlid bijwerken"
 
+#: apps/remix/app/components/dialogs/document-edit-recipient-dialog.tsx
+msgid "Update the recipient's email address and resend the signing link."
+msgstr ""
+
 #: packages/lib/constants/template.ts
 msgid "Update the role and add fields as required for the direct recipient. The individual who uses the direct link will sign the document as the direct recipient."
 msgstr "Werk de rol bij en voeg velden toe zoals nodig voor de directe ontvanger. De persoon die de directe link gebruikt, ondertekent het document als directe ontvanger."
@@ -10687,6 +10863,7 @@ msgstr "Upgrade <0>{0}</0> naar {planName}"
 msgid "Upgrade your plan to upload more documents"
 msgstr "Upgrade je abonnement om meer documenten te uploaden"
 
+#: apps/remix/app/components/dialogs/sign-field-file-dialog.tsx
 #: apps/remix/app/components/dialogs/template-use-dialog.tsx
 msgid "Upload"
 msgstr "Uploaden"
@@ -10740,6 +10917,12 @@ msgstr "Upload documenten en voeg ontvangers toe"
 #: apps/remix/app/components/general/envelope/envelope-upload-button.tsx
 msgid "Upload failed"
 msgstr "Uploaden mislukt"
+
+#: apps/remix/app/components/dialogs/sign-field-file-dialog.tsx
+#: apps/remix/app/components/general/document-signing/document-signing-file-field.tsx
+#: packages/ui/primitives/document-flow/field-content.tsx
+msgid "Upload File"
+msgstr ""
 
 #: packages/ui/primitives/signature-pad/signature-pad-upload.tsx
 msgid "Upload Signature"
@@ -11121,8 +11304,8 @@ msgstr "Wachten op jouw beurt"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
-msgid "Want to send slick signing links like this one? <0>Check out Documenso</0>."
-msgstr "Wil je ook van die strakke ondertekenlinks versturen zoals deze? <0>Bekijk Documenso</0>."
+msgid "Want to send slick signing links like this one? <0>Check out MJ Limousine</0>."
+msgstr ""
 
 #: apps/remix/app/routes/_profile+/_layout.tsx
 msgid "Want your own public profile?"
@@ -11548,8 +11731,8 @@ msgid "Welcome to {organisationName}"
 msgstr "Welkom bij {organisationName}"
 
 #: packages/email/template-components/template-confirmation-email.tsx
-msgid "Welcome to Documenso!"
-msgstr "Welkom bij Documenso!"
+msgid "Welcome to MJ Limousine Service!"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "Well-known URL is required"
@@ -11565,7 +11748,6 @@ msgstr "Wat je met teams kunt doen:"
 
 #: apps/remix/app/components/embed/authoring/configure-document-recipients.tsx
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-recipient-form.tsx
-#: packages/ui/primitives/document-flow/add-signers.tsx
 #: packages/ui/primitives/template-flow/add-template-placeholder-recipients.tsx
 msgid "When enabled, signers can choose who should sign next in the sequence instead of following the predefined order."
 msgstr "Wanneer dit is ingeschakeld, kunnen ondertekenaars zelf kiezen wie de volgende in de volgorde moet ondertekenen in plaats van de vooraf gedefinieerde volgorde te volgen."
@@ -11587,8 +11769,8 @@ msgid "Whether to enable the SSO portal for your organisation"
 msgstr "Of het SSO-portaal voor uw organisatie moet worden ingeschakeld"
 
 #: apps/remix/app/routes/_profile+/p.$url.tsx
-msgid "While waiting for them to do so you can create your own Documenso account and get started with document signing right away."
-msgstr "Terwijl je daarop wacht, kun je je eigen Documenso‑account aanmaken en direct beginnen met documenten ondertekenen."
+msgid "While waiting for them to do so you can create your own MJ Limousine account and get started with document signing right away."
+msgstr ""
 
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
 msgid "Whitelabeling, unlimited members and more"
@@ -11815,6 +11997,10 @@ msgstr "Je kunt deze link ook kopiëren en in je browser plakken: {confirmationL
 msgid "You can choose to enable or disable the profile for public view."
 msgstr "Je kunt ervoor kiezen het profiel in of uit te schakelen voor openbare weergave."
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/complete.tsx
+msgid "You can close this page now."
+msgstr ""
+
 #: apps/remix/app/components/general/document/document-recipient-link-copy-dialog.tsx
 msgid "You can copy and share these links to recipients so they can action the document."
 msgstr "Je kunt deze links kopiëren en met ontvangers delen zodat zij actie op het document kunnen ondernemen."
@@ -11833,8 +12019,8 @@ msgid "You can only detect fields in draft envelopes"
 msgstr "U kunt alleen velden detecteren in concept-enveloppen"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "You can revoke access at any time in your team settings on Documenso <0>here</0>."
-msgstr "Je kunt de toegang op elk moment intrekken in je teaminstellingen op Documenso, <0>hier</0>."
+msgid "You can revoke access at any time in your team settings on MJ Limousine <0>here</0>."
+msgstr ""
 
 #: apps/remix/app/components/forms/public-profile-form.tsx
 msgid "You can update the profile URL by updating the team URL in the general settings page."
@@ -12493,12 +12679,12 @@ msgid "Your Email"
 msgstr "Uw e-mailadres"
 
 #: apps/remix/app/routes/_unauthenticated+/verify-email.$token.tsx
-msgid "Your email has already been confirmed. You can now use all features of Documenso."
-msgstr "Je e-mailadres is al bevestigd. Je kunt nu alle functies van Documenso gebruiken."
+msgid "Your email has already been confirmed. You can now use all features of MJ Limousine."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/verify-email.$token.tsx
-msgid "Your email has been successfully confirmed! You can now use all features of Documenso."
-msgstr "Je e‑mail is succesvol bevestigd! Je kunt nu alle functies van Documenso gebruiken."
+msgid "Your email has been successfully confirmed! You can now use all features of MJ Limousine."
+msgstr ""
 
 #. placeholder {0}: teamEmail.team.name
 #. placeholder {1}: teamEmail.team.url
@@ -12570,8 +12756,8 @@ msgid "Your plan does not support inviting members. Please upgrade or your plan 
 msgstr "Je abonnement ondersteunt geen uitnodigingen van leden. Upgrade je abonnement of neem contact op met sales via <0>{SUPPORT_EMAIL}</0> om je opties te bespreken."
 
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
-msgid "Your plan is no longer valid. Please subscribe to a new plan to continue using Documenso."
-msgstr "Je abonnement is niet langer geldig. Neem een nieuw abonnement om Documenso te blijven gebruiken."
+msgid "Your plan is no longer valid. Please subscribe to a new plan to continue using MJ Limousine."
+msgstr ""
 
 #: apps/remix/app/components/forms/profile.tsx
 msgid "Your profile has been updated successfully."
@@ -12666,4 +12852,3 @@ msgstr "Uw verificatiecode:"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
-
