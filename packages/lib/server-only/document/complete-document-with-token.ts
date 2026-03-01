@@ -20,6 +20,7 @@ import { prisma } from '@documenso/prisma';
 
 import { AppError, AppErrorCode } from '../../errors/app-error';
 import { jobs } from '../../jobs/client';
+import type { JobRunIO } from '../../jobs/client/_internal/job';
 import type { TRecipientAccessAuth } from '../../types/document-auth';
 import { DocumentAuth } from '../../types/document-auth';
 import {
@@ -393,12 +394,32 @@ export const completeDocumentWithToken = async ({
   });
 
   if (haveAllRecipientsSigned) {
-    await jobs.triggerJob({
-      name: 'internal.seal-document',
-      payload: {
-        documentId: legacyDocumentId,
-        requestMetadata,
+    // Call the seal handler directly (synchronously) to avoid the fire-and-forget
+    // HTTP job dispatch which can silently fail if NEXT_PRIVATE_INTERNAL_WEBAPP_URL
+    // is not reachable (e.g. on Railway). This ensures the document status is always
+    // updated to COMPLETED in the same request.
+    const { run: sealDocument } = await import(
+      '../../jobs/definitions/internal/seal-document.handler'
+    );
+
+    const directIO: JobRunIO = {
+      runTask: async (_key, callback) => callback(),
+      triggerJob: async (_key, options) => jobs.triggerJob(options),
+      wait: async () => {
+        throw new Error('Not implemented');
       },
+      logger: {
+        info: (...args) => console.info(...args),
+        error: (...args) => console.error(...args),
+        debug: (...args) => console.debug(...args),
+        warn: (...args) => console.warn(...args),
+        log: (...args) => console.log(...args),
+      },
+    };
+
+    await sealDocument({
+      payload: { documentId: legacyDocumentId, requestMetadata },
+      io: directIO,
     });
   }
 
