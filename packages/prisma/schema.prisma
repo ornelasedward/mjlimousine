@@ -510,6 +510,8 @@ model DocumentMeta {
   dateFormat             String?              @default("yyyy-MM-dd hh:mm a") @db.Text
   redirectUrl            String?
   followUpUrl            String?
+  followUpEmailSubject   String?
+  followUpEmailMessage   String?
   signingOrder           DocumentSigningOrder @default(PARALLEL)
   allowDictateNextSigner Boolean              @default(false)
 

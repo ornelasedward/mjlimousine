@@ -200,6 +200,7 @@ export const sendCompletedEmail = async ({ id, requestMetadata }: SendDocumentOp
             ? renderCustomEmailTemplate(envelope.documentMeta.message, customEmailTemplate)
             : undefined,
         followUpUrl: envelope.documentMeta?.followUpUrl || undefined,
+        followUpEmailMessage: envelope.documentMeta?.followUpEmailMessage || undefined,
       });
 
       const [html, text] = await Promise.all([
@@ -222,10 +223,10 @@ export const sendCompletedEmail = async ({ id, requestMetadata }: SendDocumentOp
         ],
         from: senderEmail,
         replyTo: replyToEmail,
-        subject:
-          isDirectTemplate && envelope.documentMeta?.subject
+        subject: envelope.documentMeta?.followUpEmailSubject
+          || (isDirectTemplate && envelope.documentMeta?.subject
             ? renderCustomEmailTemplate(envelope.documentMeta.subject, customEmailTemplate)
-            : i18n._(msg`Signing Complete!`),
+            : i18n._(msg`Signing Complete!`)),
         html,
         text,
         attachments: completedDocumentEmailAttachments,

@@ -36,6 +36,8 @@ export const ZDistributeDocumentRequestSchema = z.object({
       distributionMethod: ZDocumentMetaDistributionMethodSchema.optional(),
       redirectUrl: ZDocumentMetaRedirectUrlSchema.optional(),
       followUpUrl: ZDocumentMetaFollowUpUrlSchema.optional(),
+      followUpEmailSubject: z.string().max(254).optional(),
+      followUpEmailMessage: z.string().max(5000).optional(),
       language: ZDocumentMetaLanguageSchema.optional(),
       emailId: z.string().nullish(),
       emailReplyTo: z.string().email().nullish(),

@@ -37,6 +37,8 @@ export const distributeDocumentRoute = authenticatedProcedure
         timezone: meta.timezone,
         redirectUrl: meta.redirectUrl,
         followUpUrl: meta.followUpUrl,
+        followUpEmailSubject: meta.followUpEmailSubject,
+        followUpEmailMessage: meta.followUpEmailMessage,
         distributionMethod: meta.distributionMethod,
         emailSettings: meta.emailSettings ?? undefined,
         language: meta.language,

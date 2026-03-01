@@ -10,6 +10,7 @@ import { TemplateFooter } from '../template-components/template-footer';
 export type DocumentCompletedEmailTemplateProps = Partial<TemplateDocumentCompletedProps> & {
   customBody?: string;
   followUpUrl?: string;
+  followUpEmailMessage?: string;
 };
 
 export const DocumentCompletedEmailTemplate = ({
@@ -18,6 +19,7 @@ export const DocumentCompletedEmailTemplate = ({
   assetBaseUrl = 'http://localhost:3002',
   customBody,
   followUpUrl,
+  followUpEmailMessage,
 }: DocumentCompletedEmailTemplateProps) => {
   const { _ } = useLingui();
   const branding = useBranding();
@@ -53,6 +55,7 @@ export const DocumentCompletedEmailTemplate = ({
                 assetBaseUrl={assetBaseUrl}
                 customBody={customBody}
                 followUpUrl={followUpUrl}
+                followUpEmailMessage={followUpEmailMessage}
               />
             </Section>
           </Container>

@@ -64,6 +64,8 @@ export const ZDocumentSchema = LegacyDocumentSchema.pick({
     dateFormat: true,
     redirectUrl: true,
     followUpUrl: true,
+    followUpEmailSubject: true,
+    followUpEmailMessage: true,
     typedSignatureEnabled: true,
     uploadSignatureEnabled: true,
     drawSignatureEnabled: true,

@@ -71,6 +71,8 @@ export const ZEnvelopeDistributeFormSchema = z.object({
       (val) => (val === '' ? undefined : val),
       z.string().url().optional(),
     ),
+    followUpEmailSubject: z.string().max(254),
+    followUpEmailMessage: z.string().max(5000),
     distributionMethod: z
       .nativeEnum(DocumentDistributionMethod)
       .optional()
@@ -106,6 +108,8 @@ export const EnvelopeDistributeDialog = ({
         subject: envelope.documentMeta?.subject ?? '',
         message: envelope.documentMeta?.message ?? '',
         followUpUrl: envelope.documentMeta?.followUpUrl ?? '',
+        followUpEmailSubject: envelope.documentMeta?.followUpEmailSubject ?? '',
+        followUpEmailMessage: envelope.documentMeta?.followUpEmailMessage ?? '',
         distributionMethod:
           envelope.documentMeta?.distributionMethod || DocumentDistributionMethod.EMAIL,
       },
@@ -420,7 +424,7 @@ export const EnvelopeDistributeDialog = ({
                                 <FormItem>
                                   <FormLabel>
                                     <Trans>
-                                      Invoice / Follow-up Link{' '}
+                                      Invoice Payment Link{' '}
                                       <span className="text-muted-foreground">(Optional)</span>
                                     </Trans>
                                   </FormLabel>
@@ -435,8 +439,66 @@ export const EnvelopeDistributeDialog = ({
 
                                   <p className="text-muted-foreground text-xs">
                                     <Trans>
-                                      A "View Invoice" button linking to this URL will be included
-                                      in the completion email sent after signing.
+                                      A "Pay Invoice" button linking to this URL will appear in the
+                                      completion email sent after signing.
+                                    </Trans>
+                                  </p>
+
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="meta.followUpEmailSubject"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    <Trans>
+                                      Completion Email Subject{' '}
+                                      <span className="text-muted-foreground">(Optional)</span>
+                                    </Trans>
+                                  </FormLabel>
+
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="e.g. Your invoice is ready"
+                                      maxLength={254}
+                                    />
+                                  </FormControl>
+
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="meta.followUpEmailMessage"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    <Trans>
+                                      Completion Email Message{' '}
+                                      <span className="text-muted-foreground">(Optional)</span>
+                                    </Trans>
+                                  </FormLabel>
+
+                                  <FormControl>
+                                    <Textarea
+                                      className="h-20 resize-none bg-background"
+                                      {...field}
+                                      maxLength={5000}
+                                      placeholder="e.g. Thank you for signing! Please pay your invoice at the link below."
+                                    />
+                                  </FormControl>
+
+                                  <p className="text-muted-foreground text-xs">
+                                    <Trans>
+                                      This message appears in the completion email sent after
+                                      signing, above the Pay Invoice button.
                                     </Trans>
                                   </p>
 

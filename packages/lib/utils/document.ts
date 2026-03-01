@@ -67,6 +67,10 @@ export const extractDerivedDocumentMeta = (
     // Envelope expiration.
     envelopeExpirationPeriod:
       meta.envelopeExpirationPeriod ?? settings.envelopeExpirationPeriod ?? null,
+
+    // Follow-up email customization.
+    followUpEmailSubject: meta.followUpEmailSubject || null,
+    followUpEmailMessage: meta.followUpEmailMessage || null,
   } satisfies Omit<DocumentMeta, 'id'>;
 };
 
