@@ -9,6 +9,7 @@ import { TemplateFooter } from '../template-components/template-footer';
 
 export type DocumentCompletedEmailTemplateProps = Partial<TemplateDocumentCompletedProps> & {
   customBody?: string;
+  followUpUrl?: string;
 };
 
 export const DocumentCompletedEmailTemplate = ({
@@ -16,6 +17,7 @@ export const DocumentCompletedEmailTemplate = ({
   documentName = 'Open Source Pledge.pdf',
   assetBaseUrl = 'http://localhost:3002',
   customBody,
+  followUpUrl,
 }: DocumentCompletedEmailTemplateProps) => {
   const { _ } = useLingui();
   const branding = useBranding();
@@ -50,6 +52,7 @@ export const DocumentCompletedEmailTemplate = ({
                 documentName={documentName}
                 assetBaseUrl={assetBaseUrl}
                 customBody={customBody}
+                followUpUrl={followUpUrl}
               />
             </Section>
           </Container>

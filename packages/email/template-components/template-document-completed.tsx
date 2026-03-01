@@ -8,6 +8,7 @@ export interface TemplateDocumentCompletedProps {
   documentName: string;
   assetBaseUrl: string;
   customBody?: string;
+  followUpUrl?: string;
 }
 
 export const TemplateDocumentCompleted = ({
@@ -15,6 +16,7 @@ export const TemplateDocumentCompleted = ({
   documentName,
   assetBaseUrl,
   customBody,
+  followUpUrl,
 }: TemplateDocumentCompletedProps) => {
   const getAssetUrl = (path: string) => {
     return new URL(path, assetBaseUrl).toString();
@@ -57,6 +59,17 @@ export const TemplateDocumentCompleted = ({
             <Trans>Download</Trans>
           </Button>
         </Section>
+
+        {followUpUrl && (
+          <Section className="mb-6 text-center">
+            <Button
+              className="rounded-lg bg-black px-4 py-2 text-center text-sm font-medium text-white no-underline"
+              href={followUpUrl}
+            >
+              <Trans>View Invoice</Trans>
+            </Button>
+          </Section>
+        )}
       </Section>
     </>
   );

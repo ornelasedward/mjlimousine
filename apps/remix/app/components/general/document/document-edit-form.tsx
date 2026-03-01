@@ -342,7 +342,7 @@ export const DocumentEditForm = ({
   };
 
   const saveSubjectData = async (data: TAddSubjectFormSchema) => {
-    const { subject, message, distributionMethod, emailId, emailReplyTo, emailSettings } =
+    const { subject, message, followUpUrl, distributionMethod, emailId, emailReplyTo, emailSettings } =
       data.meta;
 
     return updateDocument({
@@ -350,6 +350,7 @@ export const DocumentEditForm = ({
       meta: {
         subject,
         message,
+        followUpUrl,
         distributionMethod,
         emailId,
         emailReplyTo,
@@ -359,7 +360,7 @@ export const DocumentEditForm = ({
   };
 
   const sendDocumentWithSubject = async (data: TAddSubjectFormSchema) => {
-    const { subject, message, distributionMethod, emailId, emailReplyTo, emailSettings } =
+    const { subject, message, followUpUrl, distributionMethod, emailId, emailReplyTo, emailSettings } =
       data.meta;
 
     return sendDocument({
@@ -367,6 +368,7 @@ export const DocumentEditForm = ({
       meta: {
         subject,
         message,
+        followUpUrl,
         distributionMethod,
         emailId,
         emailReplyTo: emailReplyTo || null,

@@ -88,6 +88,7 @@ export const AddSubjectFormPartial = ({
         // emailReplyName: document.documentMeta?.emailReplyName || undefined,
         subject: document.documentMeta?.subject ?? '',
         message: document.documentMeta?.message ?? '',
+        followUpUrl: document.documentMeta?.followUpUrl ?? '',
         distributionMethod:
           document.documentMeta?.distributionMethod || DocumentDistributionMethod.EMAIL,
         emailSettings: ZDocumentEmailSettingsSchema.parse(document?.documentMeta?.emailSettings),
@@ -336,6 +337,35 @@ export const AddSubjectFormPartial = ({
                               maxLength={5000}
                             />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="meta.followUpUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            <Trans>
+                              Invoice / Follow-up Link{' '}
+                              <span className="text-muted-foreground">(Optional)</span>
+                            </Trans>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="url"
+                              placeholder="https://example.com/invoice"
+                            />
+                          </FormControl>
+                          <p className="text-muted-foreground text-xs">
+                            <Trans>
+                              If set, a button linking to this URL will be included in the
+                              completion email sent to signers after they sign.
+                            </Trans>
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}

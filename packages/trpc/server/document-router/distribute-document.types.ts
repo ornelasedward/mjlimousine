@@ -5,6 +5,7 @@ import { ZDocumentEmailSettingsSchema } from '@documenso/lib/types/document-emai
 import {
   ZDocumentMetaDateFormatSchema,
   ZDocumentMetaDistributionMethodSchema,
+  ZDocumentMetaFollowUpUrlSchema,
   ZDocumentMetaLanguageSchema,
   ZDocumentMetaMessageSchema,
   ZDocumentMetaRedirectUrlSchema,
@@ -34,6 +35,7 @@ export const ZDistributeDocumentRequestSchema = z.object({
       dateFormat: ZDocumentMetaDateFormatSchema.optional(),
       distributionMethod: ZDocumentMetaDistributionMethodSchema.optional(),
       redirectUrl: ZDocumentMetaRedirectUrlSchema.optional(),
+      followUpUrl: ZDocumentMetaFollowUpUrlSchema.optional(),
       language: ZDocumentMetaLanguageSchema.optional(),
       emailId: z.string().nullish(),
       emailReplyTo: z.string().email().nullish(),

@@ -509,6 +509,7 @@ model DocumentMeta {
   timezone               String?              @default("Etc/UTC") @db.Text
   dateFormat             String?              @default("yyyy-MM-dd hh:mm a") @db.Text
   redirectUrl            String?
+  followUpUrl            String?
   signingOrder           DocumentSigningOrder @default(PARALLEL)
   allowDictateNextSigner Boolean              @default(false)
 

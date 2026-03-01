@@ -27,6 +27,7 @@ export type CreateDocumentMetaOptions = {
   timezone?: string;
   dateFormat?: string;
   redirectUrl?: string;
+  followUpUrl?: string;
   emailId?: string | null;
   emailReplyTo?: string | null;
   emailSettings?: TDocumentEmailSettings;
@@ -49,6 +50,7 @@ export const updateDocumentMeta = async ({
   timezone,
   dateFormat,
   redirectUrl,
+  followUpUrl,
   signingOrder,
   allowDictateNextSigner,
   emailId,
@@ -110,6 +112,7 @@ export const updateDocumentMeta = async ({
         dateFormat,
         timezone,
         redirectUrl,
+        followUpUrl,
         signingOrder,
         allowDictateNextSigner,
         emailId,

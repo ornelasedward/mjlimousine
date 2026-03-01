@@ -199,6 +199,7 @@ export const sendCompletedEmail = async ({ id, requestMetadata }: SendDocumentOp
           isDirectTemplate && envelope.documentMeta?.message
             ? renderCustomEmailTemplate(envelope.documentMeta.message, customEmailTemplate)
             : undefined,
+        followUpUrl: envelope.documentMeta?.followUpUrl || undefined,
       });
 
       const [html, text] = await Promise.all([

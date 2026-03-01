@@ -24,6 +24,7 @@ export const ZDocumentMetaSchema = DocumentMetaSchema.pick({
   timezone: true,
   dateFormat: true,
   redirectUrl: true,
+  followUpUrl: true,
   typedSignatureEnabled: true,
   uploadSignatureEnabled: true,
   drawSignatureEnabled: true,
@@ -78,6 +79,13 @@ export const ZDocumentMetaRedirectUrlSchema = z
     message: 'Please enter a valid URL, make sure you include http:// or https:// part of the url.',
   });
 
+export const ZDocumentMetaFollowUpUrlSchema = z
+  .string()
+  .describe('A URL (e.g. an invoice link) sent to recipients in the completion email after signing.')
+  .refine((value) => value === undefined || value === '' || isValidRedirectUrl(value), {
+    message: 'Please enter a valid URL, make sure you include http:// or https:// part of the url.',
+  });
+
 export const ZDocumentMetaLanguageSchema = z
   .enum(SUPPORTED_LANGUAGE_CODES)
   .describe('The language to use for email communications with recipients.');
@@ -122,6 +130,7 @@ export const ZDocumentMetaCreateSchema = z.object({
   signingOrder: z.nativeEnum(DocumentSigningOrder).optional(),
   allowDictateNextSigner: z.boolean().optional(),
   redirectUrl: ZDocumentMetaRedirectUrlSchema.optional(),
+  followUpUrl: ZDocumentMetaFollowUpUrlSchema.optional(),
   language: ZDocumentMetaLanguageSchema.optional(),
   typedSignatureEnabled: ZDocumentMetaTypedSignatureEnabledSchema.optional(),
   uploadSignatureEnabled: ZDocumentMetaUploadSignatureEnabledSchema.optional(),
