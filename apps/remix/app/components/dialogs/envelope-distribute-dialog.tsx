@@ -67,6 +67,10 @@ export const ZEnvelopeDistributeFormSchema = z.object({
     ),
     subject: z.string(),
     message: z.string(),
+    followUpUrl: z.preprocess(
+      (val) => (val === '' ? undefined : val),
+      z.string().url().optional(),
+    ),
     distributionMethod: z
       .nativeEnum(DocumentDistributionMethod)
       .optional()
@@ -101,6 +105,7 @@ export const EnvelopeDistributeDialog = ({
         emailReplyTo: envelope.documentMeta?.emailReplyTo || undefined,
         subject: envelope.documentMeta?.subject ?? '',
         message: envelope.documentMeta?.message ?? '',
+        followUpUrl: envelope.documentMeta?.followUpUrl ?? '',
         distributionMethod:
           envelope.documentMeta?.distributionMethod || DocumentDistributionMethod.EMAIL,
       },
@@ -403,6 +408,38 @@ export const EnvelopeDistributeDialog = ({
                                       maxLength={5000}
                                     />
                                   </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="meta.followUpUrl"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    <Trans>
+                                      Invoice / Follow-up Link{' '}
+                                      <span className="text-muted-foreground">(Optional)</span>
+                                    </Trans>
+                                  </FormLabel>
+
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      type="url"
+                                      placeholder="https://invoice.example.com/..."
+                                    />
+                                  </FormControl>
+
+                                  <p className="text-muted-foreground text-xs">
+                                    <Trans>
+                                      A "View Invoice" button linking to this URL will be included
+                                      in the completion email sent after signing.
+                                    </Trans>
+                                  </p>
+
                                   <FormMessage />
                                 </FormItem>
                               )}
