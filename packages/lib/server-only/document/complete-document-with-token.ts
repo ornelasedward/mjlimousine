@@ -404,7 +404,8 @@ export const completeDocumentWithToken = async ({
 
     const directIO: JobRunIO = {
       runTask: async (_key, callback) => callback(),
-      triggerJob: async (_key, options) => jobs.triggerJob(options),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      triggerJob: async (_key, options) => jobs.triggerJob(options as any),
       wait: async () => {
         throw new Error('Not implemented');
       },
