@@ -10,10 +10,45 @@ export const DocumentSigningFieldsLoader = () => {
   );
 };
 
+const URL_REGEX = /(https?:\/\/[^\s]+)/g;
+
+const linkifyText = (text: string): React.ReactNode => {
+  const parts = text.split(URL_REGEX);
+
+  if (parts.length === 1) {
+    return text;
+  }
+
+  return parts.map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 underline"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  );
+};
+
+const linkifyChildren = (children: React.ReactNode): React.ReactNode => {
+  if (typeof children === 'string') {
+    return linkifyText(children);
+  }
+
+  return children;
+};
+
 export const DocumentSigningFieldsUninserted = ({ children }: { children: React.ReactNode }) => {
   return (
     <p className="text-foreground group-hover:text-recipient-green whitespace-pre-wrap text-[clamp(0.425rem,25cqw,0.825rem)] duration-200">
-      {children}
+      {linkifyChildren(children)}
     </p>
   );
 };
@@ -44,7 +79,7 @@ export const DocumentSigningFieldsInserted = ({
           },
         )}
       >
-        {children}
+        {linkifyChildren(children)}
       </p>
     </div>
   );

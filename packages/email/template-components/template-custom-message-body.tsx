@@ -1,7 +1,29 @@
 import React from 'react';
 
+import { Link } from '@react-email/link';
+
 export type TemplateCustomMessageBodyProps = {
   text?: string;
+};
+
+const URL_REGEX = /(https?:\/\/[^\s]+)/g;
+
+const linkifyLine = (line: string): React.ReactNode => {
+  const parts = line.split(URL_REGEX);
+
+  if (parts.length === 1) {
+    return line;
+  }
+
+  return parts.map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <Link key={i} href={part} style={{ color: '#6366f1', textDecoration: 'underline' }}>
+        {part}
+      </Link>
+    ) : (
+      part
+    ),
+  );
 };
 
 export const TemplateCustomMessageBody = ({ text }: TemplateCustomMessageBodyProps) => {
@@ -25,7 +47,7 @@ export const TemplateCustomMessageBody = ({ text }: TemplateCustomMessageBodyPro
       {paragraph.split('\n').map((line, j) => (
         <React.Fragment key={`line-${i}-${j}`}>
           {j > 0 && <br />}
-          {line}
+          {linkifyLine(line)}
         </React.Fragment>
       ))}
     </p>
