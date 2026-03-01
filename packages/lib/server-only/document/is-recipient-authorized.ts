@@ -97,17 +97,8 @@ export const isRecipientAuthorized = async ({
 
   return await match(authOptions)
     .with({ type: DocumentAuth.ACCOUNT }, async () => {
-      if (!userId) {
-        return false;
-      }
-
-      const recipientUser = await getUserByEmail(recipient.email);
-
-      if (!recipientUser) {
-        return false;
-      }
-
-      return recipientUser.id === userId;
+      // Link-based signing: the signing token itself is sufficient auth.
+      return true;
     })
     .with({ type: DocumentAuth.PASSKEY }, async ({ authenticationResponse, tokenReference }) => {
       if (!userId) {

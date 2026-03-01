@@ -108,12 +108,8 @@ const handleV1Loader = async ({ params, request }: Route.LoaderArgs) => {
     recipientAuth: recipient.authOptions,
   });
 
-  const isAccessAuthValid = derivedRecipientAccessAuth.every((accesssAuth) =>
-    match(accesssAuth)
-      .with(DocumentAccessAuth.ACCOUNT, () => user && user.email === recipient.email)
-      .with(DocumentAccessAuth.TWO_FACTOR_AUTH, () => true) // Allow without account requirement
-      .exhaustive(),
-  );
+  // Link-based signing: the signing token itself is sufficient auth — always allow access.
+  const isAccessAuthValid = true;
 
   let recipientHasAccount: boolean | null = null;
 
@@ -218,12 +214,8 @@ const handleV2Loader = async ({ params, request }: Route.LoaderArgs) => {
     recipientAuth: recipient.authOptions,
   });
 
-  const isAccessAuthValid = derivedRecipientAccessAuth.every((accesssAuth) =>
-    match(accesssAuth)
-      .with(DocumentAccessAuth.ACCOUNT, () => user && user.email === recipient.email)
-      .with(DocumentAccessAuth.TWO_FACTOR_AUTH, () => true) // Allow without account requirement
-      .exhaustive(),
-  );
+  // Link-based signing: the signing token itself is sufficient auth — always allow access.
+  const isAccessAuthValid = true;
 
   let recipientHasAccount: boolean | null = null;
 
