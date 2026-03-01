@@ -63,6 +63,7 @@ export const ZDocumentSchema = LegacyDocumentSchema.pick({
     timezone: true,
     dateFormat: true,
     redirectUrl: true,
+    followUpUrl: true,
     typedSignatureEnabled: true,
     uploadSignatureEnabled: true,
     drawSignatureEnabled: true,

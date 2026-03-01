@@ -47,6 +47,7 @@ export const extractDerivedDocumentMeta = (
     message: meta.message || null,
     subject: meta.subject || null,
     redirectUrl: meta.redirectUrl || null,
+    followUpUrl: meta.followUpUrl || null,
 
     signingOrder: meta.signingOrder || DocumentSigningOrder.PARALLEL,
     allowDictateNextSigner: meta.allowDictateNextSigner ?? false,
