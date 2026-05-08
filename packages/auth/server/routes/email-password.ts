@@ -58,6 +58,7 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
    */
   .post('/authorize', sValidator('json', ZSignInSchema), async (c) => {
     const requestMetadata = c.get('requestMetadata');
+    const isPasswordOnlySigninEnabled = env('NEXT_PRIVATE_AUTH_PASSWORD_ONLY_SIGNIN') === 'true';
 
     const { email, password, totpCode, backupCode, csrfToken } = c.req.valid('json');
 
@@ -77,7 +78,7 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
     const csrfCookieToken = await getCsrfCookie(c);
 
     // Todo: (RR7) Add logging here.
-    if (csrfToken !== csrfCookieToken || !csrfCookieToken) {
+    if (!isPasswordOnlySigninEnabled && (csrfToken !== csrfCookieToken || !csrfCookieToken)) {
       throw new AppError(AuthenticationErrorCode.InvalidRequest, {
         message: 'Invalid CSRF token',
       });
@@ -121,7 +122,7 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
 
     const is2faEnabled = isTwoFactorAuthenticationEnabled({ user });
 
-    if (is2faEnabled) {
+    if (!isPasswordOnlySigninEnabled && is2faEnabled) {
       const isValid = await validateTwoFactorAuthentication({ backupCode, totpCode, user });
 
       if (!isValid) {
@@ -138,7 +139,7 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
       }
     }
 
-    if (!user.emailVerified) {
+    if (!isPasswordOnlySigninEnabled && !user.emailVerified) {
       const mostRecentToken = await getMostRecentEmailVerificationToken({
         userId: user.id,
       });
