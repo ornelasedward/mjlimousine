@@ -168,10 +168,9 @@ export function TemplateUseDialog({
 
   const generateDefaultFormValues = () => {
     const storedRecipients = getStoredRecipients();
-    const shouldDistributeByDefault = recipients.length > 0;
 
     return {
-      distributeDocument: shouldDistributeByDefault,
+      distributeDocument: false,
       useCustomDocument: false,
       customDocumentData: envelopeItems.map((item) => ({
         title: item.title,
