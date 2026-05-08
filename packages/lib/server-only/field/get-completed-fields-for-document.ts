@@ -2,6 +2,8 @@ import { SigningStatus } from '@prisma/client';
 
 import { prisma } from '@documenso/prisma';
 
+import { mapDocumentIdToSecondaryId } from '../../utils/envelope';
+
 export type GetCompletedFieldsForDocumentOptions = {
   documentId: number;
 };
@@ -9,9 +11,13 @@ export type GetCompletedFieldsForDocumentOptions = {
 export const getCompletedFieldsForDocument = async ({
   documentId,
 }: GetCompletedFieldsForDocumentOptions) => {
+  const secondaryId = mapDocumentIdToSecondaryId(documentId);
+
   return await prisma.field.findMany({
     where: {
-      documentId,
+      envelope: {
+        secondaryId,
+      },
       recipient: {
         signingStatus: SigningStatus.SIGNED,
       },

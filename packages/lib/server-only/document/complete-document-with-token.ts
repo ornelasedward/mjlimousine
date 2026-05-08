@@ -119,12 +119,24 @@ export const completeDocumentWithToken = async ({
     }
   }
 
-  const fields = await prisma.field.findMany({
-    where: {
-      envelopeId: envelope.id,
-      recipientId: recipient.id,
-    },
-  });
+  const getRecipientFields = async () =>
+    prisma.field.findMany({
+      where: {
+        envelopeId: envelope.id,
+        recipientId: recipient.id,
+      },
+    });
+
+  let fields = await getRecipientFields();
+
+  if (fieldsContainUnsignedRequiredField(fields)) {
+    // Mitigate transient race conditions where field signing and completion happen
+    // almost simultaneously and completion checks run before field updates commit.
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 400);
+    });
+    fields = await getRecipientFields();
+  }
 
   if (fieldsContainUnsignedRequiredField(fields)) {
     throw new Error(`Recipient ${recipient.id} has unsigned fields`);
@@ -382,18 +394,46 @@ export const completeDocumentWithToken = async ({
     }
   }
 
-  const haveAllRecipientsSigned = await prisma.envelope.findFirst({
+  const creator = await prisma.user.findUniqueOrThrow({
     where: {
-      id: envelope.id,
-      recipients: {
-        every: {
-          OR: [{ signingStatus: SigningStatus.SIGNED }, { role: RecipientRole.CC }],
-        },
-      },
+      id: envelope.userId,
+    },
+    select: {
+      email: true,
     },
   });
 
-  if (haveAllRecipientsSigned) {
+  const normalizedCreatorEmail = creator.email.toLowerCase();
+
+  const recipientsForCompletionCheck = await prisma.recipient.findMany({
+    where: {
+      envelopeId: envelope.id,
+    },
+    select: {
+      email: true,
+      role: true,
+      signingStatus: true,
+    },
+  });
+
+  const haveAllRequiredRecipientsSigned = recipientsForCompletionCheck.every((recipientToCheck) => {
+    const isNonSigningRole =
+      recipientToCheck.role === RecipientRole.CC ||
+      recipientToCheck.role === RecipientRole.VIEWER ||
+      recipientToCheck.role === RecipientRole.ASSISTANT;
+
+    const isLegacyOwnerRecipient =
+      recipientToCheck.email.toLowerCase() === normalizedCreatorEmail &&
+      recipientToCheck.role !== RecipientRole.CC;
+
+    return (
+      recipientToCheck.signingStatus === SigningStatus.SIGNED ||
+      isNonSigningRole ||
+      isLegacyOwnerRecipient
+    );
+  });
+
+  if (haveAllRequiredRecipientsSigned) {
     // Call the seal handler directly (synchronously) to avoid the fire-and-forget
     // HTTP job dispatch which can silently fail if NEXT_PRIVATE_INTERNAL_WEBAPP_URL
     // is not reachable (e.g. on Railway). This ensures the document status is always
@@ -406,7 +446,7 @@ export const completeDocumentWithToken = async ({
       runTask: async (_key, callback) => callback(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       triggerJob: async (_key, options) => jobs.triggerJob(options as any),
-      wait: async () => {
+      wait: () => {
         throw new Error('Not implemented');
       },
       logger: {

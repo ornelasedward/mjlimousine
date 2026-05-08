@@ -1,9 +1,7 @@
-import type { LucideIcon } from 'lucide-react/dist/lucide-react';
-
 import { cn } from '@documenso/ui/lib/utils';
 
 export type CardMetricProps = {
-  icon?: LucideIcon;
+  icon?: React.ComponentType<{ className?: string }>;
   title: string;
   value?: string | number;
   className?: string;

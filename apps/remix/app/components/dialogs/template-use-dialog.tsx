@@ -11,6 +11,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import * as z from 'zod';
 
+import { useSession } from '@documenso/lib/client-only/providers/session';
 import { APP_DOCUMENT_UPLOAD_SIZE_LIMIT } from '@documenso/lib/constants/app';
 import {
   TEMPLATE_RECIPIENT_EMAIL_PLACEHOLDER_REGEX,
@@ -50,6 +51,12 @@ import { SpinnerBox } from '@documenso/ui/primitives/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@documenso/ui/primitives/tooltip';
 import type { Toast } from '@documenso/ui/primitives/use-toast';
 import { useToast } from '@documenso/ui/primitives/use-toast';
+
+type StoredTemplateRecipient = {
+  id: number;
+  email: string;
+  name: string;
+};
 
 const ZAddRecipientsForNewDocumentSchema = z.object({
   distributeDocument: z.boolean(),
@@ -96,6 +103,7 @@ export function TemplateUseDialog({
 }: TemplateUseDialogProps) {
   const { toast } = useToast();
   const { _ } = useLingui();
+  const { user } = useSession();
 
   const navigate = useNavigate();
 
@@ -115,9 +123,55 @@ export function TemplateUseDialog({
 
   const envelopeItems = response?.data ?? [];
 
+  const getStoredRecipients = (): StoredTemplateRecipient[] => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+
+    try {
+      const rawValue = localStorage.getItem(`template-use-recipients:${templateId}`);
+
+      if (!rawValue) {
+        return [];
+      }
+
+      const parsed = JSON.parse(rawValue);
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.filter(
+        (recipient): recipient is StoredTemplateRecipient =>
+          typeof recipient?.id === 'number' &&
+          typeof recipient?.email === 'string' &&
+          typeof recipient?.name === 'string',
+      );
+    } catch {
+      return [];
+    }
+  };
+
+  const storeRecipients = (recipients: TAddRecipientsForNewDocumentSchema['recipients']) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const valueToStore: StoredTemplateRecipient[] = recipients.map((recipient) => ({
+      id: recipient.id,
+      email: recipient.email,
+      name: recipient.name,
+    }));
+
+    localStorage.setItem(`template-use-recipients:${templateId}`, JSON.stringify(valueToStore));
+  };
+
   const generateDefaultFormValues = () => {
+    const storedRecipients = getStoredRecipients();
+    const shouldDistributeByDefault = recipients.length > 0;
+
     return {
-      distributeDocument: false,
+      distributeDocument: shouldDistributeByDefault,
       useCustomDocument: false,
       customDocumentData: envelopeItems.map((item) => ({
         title: item.title,
@@ -134,11 +188,12 @@ export function TemplateUseDialog({
           const isRecipientNamePlaceholder = recipient.name.match(
             TEMPLATE_RECIPIENT_NAME_PLACEHOLDER_REGEX,
           );
+          const storedRecipient = storedRecipients.find((stored) => stored.id === recipient.id);
 
           return {
             id: recipient.id,
-            name: !isRecipientNamePlaceholder ? recipient.name : '',
-            email: !isRecipientEmailPlaceholder ? recipient.email : '',
+            name: !isRecipientNamePlaceholder ? recipient.name : (storedRecipient?.name ?? ''),
+            email: !isRecipientEmailPlaceholder ? recipient.email : (storedRecipient?.email ?? ''),
             signingOrder: recipient.signingOrder ?? undefined,
           };
         }),
@@ -182,6 +237,8 @@ export function TemplateUseDialog({
         distributeDocument: data.distributeDocument,
         customDocumentData,
       });
+
+      storeRecipients(data.recipients);
 
       toast({
         title: _(msg`Document created`),
@@ -339,6 +396,27 @@ export function TemplateUseDialog({
                         </FormItem>
                       )}
                     />
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn('mt-auto whitespace-nowrap', {
+                        'mb-6': index === 0,
+                      })}
+                      disabled={!user?.email}
+                      onClick={() => {
+                        form.setValue(`recipients.${index}.email`, user?.email ?? '', {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                        form.setValue(`recipients.${index}.name`, user?.name ?? '', {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                    >
+                      <Trans>Use my details</Trans>
+                    </Button>
                   </div>
                 ))}
 

@@ -4,7 +4,6 @@ import type { MessageDescriptor } from '@lingui/core';
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import { CheckCircle2, Clock, File, XCircle } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react/dist/lucide-react';
 
 import type { ExtendedDocumentStatus } from '@documenso/prisma/types/extended-document-status';
 import { SignatureIcon } from '@documenso/ui/icons/signature';
@@ -13,7 +12,7 @@ import { cn } from '@documenso/ui/lib/utils';
 type FriendlyStatus = {
   label: MessageDescriptor;
   labelExtended: MessageDescriptor;
-  icon?: LucideIcon;
+  icon?: React.ComponentType<{ className?: string }>;
   color: string;
 };
 

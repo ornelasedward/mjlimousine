@@ -9,27 +9,42 @@ export interface FindTeamInvoicesOptions {
 }
 
 export const findOrganisationInvoices = async ({ userId, teamId }: FindTeamInvoicesOptions) => {
-  const team = await prisma.team.findUniqueOrThrow({
+  const team = await prisma.team.findFirstOrThrow({
     where: {
       id: teamId,
-      members: {
+      teamGroups: {
         some: {
-          userId,
-          role: {
+          teamRole: {
             in: TEAM_MEMBER_ROLE_PERMISSIONS_MAP['MANAGE_TEAM'],
           },
+          organisationGroup: {
+            organisationGroupMembers: {
+              some: {
+                organisationMember: {
+                  userId,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    select: {
+      organisation: {
+        select: {
+          customerId: true,
         },
       },
     },
   });
 
-  if (!team.customerId) {
+  if (!team.organisation.customerId) {
     throw new AppError(AppErrorCode.NOT_FOUND, {
       message: 'Team has no customer ID.',
     });
   }
 
-  const results = await getInvoices({ customerId: team.customerId });
+  const results = await getInvoices({ customerId: team.organisation.customerId });
 
   if (!results) {
     return null;

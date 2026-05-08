@@ -1,8 +1,13 @@
 import { forwardRef } from 'react';
 
-import type { LucideIcon } from 'lucide-react/dist/lucide-react';
+type SignatureIconProps = React.SVGProps<SVGSVGElement> & {
+  size?: number | string;
+  color?: string;
+  strokeWidth?: number | string;
+  absoluteStrokeWidth?: boolean;
+};
 
-export const SignatureIcon: LucideIcon = forwardRef(
+export const SignatureIcon = forwardRef<SVGSVGElement, SignatureIconProps>(
   (
     { size = 24, color = 'currentColor', strokeWidth = 1.33, absoluteStrokeWidth, ...props },
     ref,

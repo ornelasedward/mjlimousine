@@ -33,6 +33,7 @@ import {
   FormMessage,
 } from '@documenso/ui/primitives/form/form';
 import { Input } from '@documenso/ui/primitives/input';
+import { useToast } from '@documenso/ui/primitives/use-toast';
 
 import { useEmbedSigningContext } from '~/components/embed/embed-signing-context';
 import { AccessAuth2FAForm } from '~/components/general/document-signing/access-auth-2fa-form';
@@ -97,6 +98,7 @@ export const DocumentSigningCompleteDialog = ({
   disableNameInput = false,
 }: DocumentSigningCompleteDialogProps) => {
   const { t } = useLingui();
+  const { toast } = useToast();
 
   const [showDialog, setShowDialog] = useState(false);
 
@@ -183,6 +185,12 @@ export const DocumentSigningCompleteDialog = ({
 
         return;
       }
+
+      toast({
+        title: t`Unable to complete signing`,
+        description: err.message || t`An unexpected error occurred while completing the document.`,
+        variant: 'destructive',
+      });
     }
   };
 

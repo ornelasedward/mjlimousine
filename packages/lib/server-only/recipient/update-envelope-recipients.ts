@@ -44,6 +44,17 @@ export const updateEnvelopeRecipients = async ({
   recipients,
   requestMetadata,
 }: UpdateEnvelopeRecipientsOptions) => {
+  const actingUser = await prisma.user.findFirstOrThrow({
+    where: {
+      id: userId,
+    },
+    select: {
+      email: true,
+    },
+  });
+
+  const normalizedActingUserEmail = actingUser.email.toLowerCase();
+
   const { envelopeWhereInput } = await getEnvelopeWhereInput({
     id,
     type: null,
@@ -131,21 +142,32 @@ export const updateEnvelopeRecipients = async ({
           ...updateData,
         };
 
+        const shouldDowngradeOwnerToCC =
+          mergedRecipient.email.toLowerCase() === normalizedActingUserEmail &&
+          mergedRecipient.role !== RecipientRole.CC;
+
+        const finalRecipient = shouldDowngradeOwnerToCC
+          ? {
+              ...mergedRecipient,
+              role: RecipientRole.CC,
+            }
+          : mergedRecipient;
+
         const updatedRecipient = await tx.recipient.update({
           where: {
             id: originalRecipient.id,
             envelopeId: envelope.id,
           },
           data: {
-            name: mergedRecipient.name,
-            email: mergedRecipient.email,
-            role: mergedRecipient.role,
-            signingOrder: mergedRecipient.signingOrder,
+            name: finalRecipient.name,
+            email: finalRecipient.email,
+            role: finalRecipient.role,
+            signingOrder: finalRecipient.signingOrder,
             envelopeId: envelope.id,
             sendStatus:
-              mergedRecipient.role === RecipientRole.CC ? SendStatus.SENT : SendStatus.NOT_SENT,
+              finalRecipient.role === RecipientRole.CC ? SendStatus.SENT : SendStatus.NOT_SENT,
             signingStatus:
-              mergedRecipient.role === RecipientRole.CC
+              finalRecipient.role === RecipientRole.CC
                 ? SigningStatus.SIGNED
                 : SigningStatus.NOT_SIGNED,
             authOptions,

@@ -112,10 +112,15 @@ export const setDocumentRecipients = async ({
     });
   }
 
-  const normalizedRecipients = recipients.map((recipient) => ({
-    ...recipient,
-    email: recipient.email.toLowerCase(),
-  }));
+  const normalizedRecipients = recipients
+    .map((recipient) => ({
+      ...recipient,
+      email: recipient.email.toLowerCase(),
+    }))
+    .filter(
+      (recipient) =>
+        !(recipient.email === user.email.toLowerCase() && recipient.role !== RecipientRole.CC),
+    );
 
   const existingRecipients = envelope.recipients;
 

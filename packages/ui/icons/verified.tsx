@@ -1,8 +1,11 @@
 import { forwardRef } from 'react';
 
-import type { LucideIcon } from 'lucide-react/dist/lucide-react';
+type VerifiedIconProps = React.SVGProps<SVGSVGElement> & {
+  size?: number | string;
+  color?: string;
+};
 
-export const VerifiedIcon: LucideIcon = forwardRef(
+export const VerifiedIcon = forwardRef<SVGSVGElement, VerifiedIconProps>(
   ({ size = 24, color = 'currentColor', ...props }, ref) => {
     return (
       <svg

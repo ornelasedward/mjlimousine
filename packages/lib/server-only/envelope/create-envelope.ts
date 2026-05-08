@@ -111,6 +111,24 @@ export const createEnvelope = async ({
   requestMetadata,
   internalVersion,
 }: CreateEnvelopeOptions) => {
+  const actingUser = await prisma.user.findFirstOrThrow({
+    where: {
+      id: userId,
+    },
+    select: {
+      email: true,
+    },
+  });
+
+  const normalizedActingUserEmail = actingUser.email.toLowerCase();
+  const normalizedInputRecipients = (data.recipients || []).filter(
+    (recipient) =>
+      !(
+        recipient.email.toLowerCase() === normalizedActingUserEmail &&
+        recipient.role !== RecipientRole.CC
+      ),
+  );
+
   const {
     type,
     title,
@@ -367,7 +385,15 @@ export const createEnvelope = async ({
       }),
     );
 
-    const allRecipients = [...(data.recipients || []), ...mappedDefaultRecipients];
+    const filteredDefaultRecipients = mappedDefaultRecipients.filter(
+      (recipient) =>
+        !(
+          recipient.email.toLowerCase() === normalizedActingUserEmail &&
+          recipient.role !== RecipientRole.CC
+        ),
+    );
+
+    const allRecipients = [...normalizedInputRecipients, ...filteredDefaultRecipients];
 
     await Promise.all(
       allRecipients.map(async (recipient) => {
@@ -459,7 +485,7 @@ export const createEnvelope = async ({
       });
 
       const shouldCreatePlaceholderRecipients =
-        (!data.recipients || data.recipients.length === 0) && uniqueRecipientRefs.size > 0;
+        normalizedInputRecipients.length === 0 && uniqueRecipientRefs.size > 0;
 
       // If recipients were not provided, create placeholder recipients even when defaults exist.
       if (shouldCreatePlaceholderRecipients) {
@@ -509,8 +535,8 @@ export const createEnvelope = async ({
             findRecipientByPlaceholder(
               recipientPlaceholder,
               placeholder,
-              data.recipients && data.recipients.length > 0
-                ? data.recipients.map((r) => {
+              normalizedInputRecipients.length > 0
+                ? normalizedInputRecipients.map((r) => {
                     const found = availableRecipients.find((cr) => cr.email === r.email);
 
                     if (!found) {

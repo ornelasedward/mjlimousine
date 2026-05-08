@@ -5,13 +5,12 @@ import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import type { TemplateType as TemplateTypePrisma } from '@prisma/client';
 import { Globe2, Lock } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react/dist/lucide-react';
 
 import { cn } from '@documenso/ui/lib/utils';
 
 type TemplateTypeIcon = {
   label: MessageDescriptor;
-  icon?: LucideIcon;
+  icon?: React.ComponentType<{ className?: string }>;
   color: string;
 };
 

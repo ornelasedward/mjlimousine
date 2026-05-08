@@ -9,7 +9,7 @@ import { Trans } from '@lingui/react/macro';
 import type { Field, Recipient } from '@prisma/client';
 import { DocumentSigningOrder, RecipientRole, SendStatus } from '@prisma/client';
 import { motion } from 'framer-motion';
-import { GripVerticalIcon, HelpCircle, Plus, Trash } from 'lucide-react';
+import { GripVerticalIcon, Plus, Trash } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { prop, sortBy } from 'remeda';
 
@@ -39,7 +39,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { FormErrorMessage } from '../form/form-error-message';
 import { Input } from '../input';
 import { useStep } from '../stepper';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip';
 import { useToast } from '../use-toast';
 import type { TAddSignersFormSchema } from './add-signers.types';
 import { ZAddSignersFormSchema } from './add-signers.types';
@@ -253,8 +252,9 @@ export const AddSignersFormPartial = ({
   };
 
   const emptySignerIndex = watchedSigners.findIndex((signer) => !signer.name && !signer.email);
+  const normalizedUserEmail = user?.email?.toLowerCase() ?? '';
   const isUserAlreadyARecipient = watchedSigners.some(
-    (signer) => signer.email.toLowerCase() === user?.email?.toLowerCase(),
+    (signer) => signer.email.toLowerCase() === normalizedUserEmail,
   );
 
   const hasDocumentBeenSent = recipients.some(
@@ -842,17 +842,6 @@ export const AddSignersFormPartial = ({
 
               <Button
                 type="button"
-                variant="secondary"
-                className="bg-black/5 hover:bg-black/10 dark:bg-muted dark:hover:bg-muted/80"
-                disabled={isSubmitting || isUserAlreadyARecipient}
-                onClick={() => onAddSelfSigner()}
-              >
-                <Plus className="-ml-1 mr-2 h-5 w-5" />
-                <Trans>Add myself</Trans>
-              </Button>
-
-              <Button
-                type="button"
                 variant="outline"
                 size="sm"
                 disabled={isSubmitting || isUserAlreadyARecipient}
@@ -889,7 +878,7 @@ export const AddSignersFormPartial = ({
                   }
                 }}
               >
-                <Trans>Add myself (fills at setup)</Trans>
+                <Trans>Add myself (optional)</Trans>
               </Button>
             </div>
 

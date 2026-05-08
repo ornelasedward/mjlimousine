@@ -25,6 +25,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { getBoundingClientRect } from '@documenso/lib/client-only/get-bounding-client-rect';
 import { useAutoSave } from '@documenso/lib/client-only/hooks/use-autosave';
 import { useDocumentElement } from '@documenso/lib/client-only/hooks/use-document-element';
+import { useSession } from '@documenso/lib/client-only/providers/session';
 import { PDF_VIEWER_PAGE_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
 import { RECIPIENT_ROLES_DESCRIPTION } from '@documenso/lib/constants/recipient-roles';
 import { isTemplateRecipientEmailPlaceholder } from '@documenso/lib/constants/template';
@@ -93,6 +94,7 @@ export const AddTemplateFieldsFormPartial = ({
 }: AddTemplateFieldsFormProps) => {
   const { _ } = useLingui();
   const { toast } = useToast();
+  const { user } = useSession();
 
   const { isWithinPageBounds, getFieldPosition, getPage } = useDocumentElement();
   const { currentStep, totalSteps, previousStep } = useStep();
@@ -513,11 +515,19 @@ export const AddTemplateFieldsFormPartial = ({
         recipient.role !== RecipientRole.CC && recipient.role !== RecipientRole.ASSISTANT,
     );
 
+    const normalizedUserEmail = user?.email?.toLowerCase();
+    const selfRecipient = normalizedUserEmail
+      ? recipientsByRoleToDisplay.find(
+          (recipient) => recipient.email.toLowerCase() === normalizedUserEmail,
+        )
+      : undefined;
+
     setSelectedSigner(
-      recipientsByRoleToDisplay.find((r) => r.sendStatus !== SendStatus.SENT) ??
+      selfRecipient ??
+        recipientsByRoleToDisplay.find((r) => r.sendStatus !== SendStatus.SENT) ??
         recipientsByRoleToDisplay[0],
     );
-  }, [recipients]);
+  }, [recipients, user?.email]);
 
   const recipientsByRoleToDisplay = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

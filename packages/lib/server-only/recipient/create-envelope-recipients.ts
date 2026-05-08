@@ -37,6 +37,17 @@ export const createEnvelopeRecipients = async ({
   recipients: recipientsToCreate,
   requestMetadata,
 }: CreateEnvelopeRecipientsOptions) => {
+  const actingUser = await prisma.user.findFirstOrThrow({
+    where: {
+      id: userId,
+    },
+    select: {
+      email: true,
+    },
+  });
+
+  const normalizedActingUserEmail = actingUser.email.toLowerCase();
+
   const { envelopeWhereInput } = await getEnvelopeWhereInput({
     id,
     type: null,
@@ -83,10 +94,15 @@ export const createEnvelopeRecipients = async ({
     });
   }
 
-  const normalizedRecipients = recipientsToCreate.map((recipient) => ({
-    ...recipient,
-    email: recipient.email.toLowerCase(),
-  }));
+  const normalizedRecipients = recipientsToCreate
+    .map((recipient) => ({
+      ...recipient,
+      email: recipient.email.toLowerCase(),
+    }))
+    .filter(
+      (recipient) =>
+        !(recipient.email === normalizedActingUserEmail && recipient.role !== RecipientRole.CC),
+    );
 
   const createdRecipients = await prisma.$transaction(async (tx) => {
     return await Promise.all(

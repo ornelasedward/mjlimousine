@@ -102,3 +102,5 @@ declare namespace NodeJS {
     GOOGLE_VERTEX_API_KEY?: string;
   }
 }
+
+declare module 'lucide-react';

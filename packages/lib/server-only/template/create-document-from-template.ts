@@ -312,6 +312,17 @@ export const createDocumentFromTemplate = async ({
   attachments,
   formValues,
 }: CreateDocumentFromTemplateOptions) => {
+  const creator = await prisma.user.findFirstOrThrow({
+    where: {
+      id: userId,
+    },
+    select: {
+      email: true,
+    },
+  });
+
+  const normalizedCreatorEmail = creator.email.toLowerCase();
+
   const { envelopeWhereInput } = await getEnvelopeWhereInput({
     id,
     type: EnvelopeType.TEMPLATE,
@@ -389,42 +400,58 @@ export const createDocumentFromTemplate = async ({
     documentAuth: template.authOptions,
   });
 
-  const finalRecipients: FinalRecipient[] = template.recipients.map((templateRecipient) => {
-    const foundRecipient = recipients.find((recipient) => recipient.id === templateRecipient.id);
+  const finalRecipients: FinalRecipient[] = template.recipients
+    .map((templateRecipient) => {
+      const foundRecipient = recipients.find((recipient) => recipient.id === templateRecipient.id);
 
-    return {
-      templateRecipientId: templateRecipient.id,
-      fields: templateRecipient.fields,
-      name: foundRecipient ? (foundRecipient.name ?? '') : templateRecipient.name,
-      email: foundRecipient ? foundRecipient.email : templateRecipient.email,
-      role: templateRecipient.role,
-      signingOrder: foundRecipient?.signingOrder ?? templateRecipient.signingOrder,
-      authOptions: templateRecipient.authOptions,
-      token: nanoid(),
-    };
-  });
+      return {
+        templateRecipientId: templateRecipient.id,
+        fields: templateRecipient.fields,
+        name: foundRecipient ? (foundRecipient.name ?? '') : templateRecipient.name,
+        email: foundRecipient ? foundRecipient.email : templateRecipient.email,
+        role: templateRecipient.role,
+        signingOrder: foundRecipient?.signingOrder ?? templateRecipient.signingOrder,
+        authOptions: templateRecipient.authOptions,
+        token: nanoid(),
+      };
+    })
+    .filter(
+      (recipient) =>
+        !(
+          recipient.email.toLowerCase() === normalizedCreatorEmail &&
+          recipient.role !== RecipientRole.CC
+        ),
+    );
 
   const defaultRecipients = settings.defaultRecipients
     ? ZDefaultRecipientsSchema.parse(settings.defaultRecipients)
     : [];
 
-  const defaultRecipientsFinal: FinalRecipient[] = defaultRecipients.map((recipient) => {
-    const authOptions = ZRecipientAuthOptionsSchema.parse({});
+  const defaultRecipientsFinal: FinalRecipient[] = defaultRecipients
+    .map((recipient) => {
+      const authOptions = ZRecipientAuthOptionsSchema.parse({});
 
-    return {
-      templateRecipientId: -1,
-      fields: [],
-      name: recipient.name || recipient.email,
-      email: recipient.email,
-      role: recipient.role,
-      signingOrder: null,
-      authOptions: createRecipientAuthOptions({
-        accessAuth: authOptions.accessAuth,
-        actionAuth: authOptions.actionAuth,
-      }),
-      token: nanoid(),
-    };
-  });
+      return {
+        templateRecipientId: -1,
+        fields: [],
+        name: recipient.name || recipient.email,
+        email: recipient.email,
+        role: recipient.role,
+        signingOrder: null,
+        authOptions: createRecipientAuthOptions({
+          accessAuth: authOptions.accessAuth,
+          actionAuth: authOptions.actionAuth,
+        }),
+        token: nanoid(),
+      };
+    })
+    .filter(
+      (recipient) =>
+        !(
+          recipient.email.toLowerCase() === normalizedCreatorEmail &&
+          recipient.role !== RecipientRole.CC
+        ),
+    );
 
   const allFinalRecipients = [...finalRecipients, ...defaultRecipientsFinal];
 
