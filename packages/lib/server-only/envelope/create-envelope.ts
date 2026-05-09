@@ -121,13 +121,18 @@ export const createEnvelope = async ({
   });
 
   const normalizedActingUserEmail = actingUser.email.toLowerCase();
-  const normalizedInputRecipients = (data.recipients || []).filter(
-    (recipient) =>
-      !(
-        recipient.email.toLowerCase() === normalizedActingUserEmail &&
-        recipient.role !== RecipientRole.CC
-      ),
-  );
+  const isDocumentEnvelope = data.type === EnvelopeType.DOCUMENT;
+
+  const normalizedInputRecipients = (data.recipients || []).filter((recipient) => {
+    if (!isDocumentEnvelope) {
+      return true;
+    }
+
+    return !(
+      recipient.email.toLowerCase() === normalizedActingUserEmail &&
+      recipient.role !== RecipientRole.CC
+    );
+  });
 
   const {
     type,
@@ -385,13 +390,16 @@ export const createEnvelope = async ({
       }),
     );
 
-    const filteredDefaultRecipients = mappedDefaultRecipients.filter(
-      (recipient) =>
-        !(
-          recipient.email.toLowerCase() === normalizedActingUserEmail &&
-          recipient.role !== RecipientRole.CC
-        ),
-    );
+    const filteredDefaultRecipients = mappedDefaultRecipients.filter((recipient) => {
+      if (!isDocumentEnvelope) {
+        return true;
+      }
+
+      return !(
+        recipient.email.toLowerCase() === normalizedActingUserEmail &&
+        recipient.role !== RecipientRole.CC
+      );
+    });
 
     const allRecipients = [...normalizedInputRecipients, ...filteredDefaultRecipients];
 

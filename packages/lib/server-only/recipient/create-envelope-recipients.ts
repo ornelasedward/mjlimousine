@@ -99,10 +99,15 @@ export const createEnvelopeRecipients = async ({
       ...recipient,
       email: recipient.email.toLowerCase(),
     }))
-    .filter(
-      (recipient) =>
-        !(recipient.email === normalizedActingUserEmail && recipient.role !== RecipientRole.CC),
-    );
+    .filter((recipient) => {
+      if (envelope.type !== EnvelopeType.DOCUMENT) {
+        return true;
+      }
+
+      return !(
+        recipient.email === normalizedActingUserEmail && recipient.role !== RecipientRole.CC
+      );
+    });
 
   const createdRecipients = await prisma.$transaction(async (tx) => {
     return await Promise.all(

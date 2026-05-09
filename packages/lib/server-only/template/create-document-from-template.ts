@@ -400,8 +400,8 @@ export const createDocumentFromTemplate = async ({
     documentAuth: template.authOptions,
   });
 
-  const finalRecipients: FinalRecipient[] = template.recipients
-    .map((templateRecipient) => {
+  const mappedTemplateRecipients: FinalRecipient[] = template.recipients.map(
+    (templateRecipient) => {
       const foundRecipient = recipients.find((recipient) => recipient.id === templateRecipient.id);
 
       return {
@@ -414,14 +414,33 @@ export const createDocumentFromTemplate = async ({
         authOptions: templateRecipient.authOptions,
         token: nanoid(),
       };
-    })
-    .filter(
+    },
+  );
+
+  const isFilteredCreatorRecipient = (recipient: FinalRecipient) =>
+    recipient.email.toLowerCase() === normalizedCreatorEmail && recipient.role !== RecipientRole.CC;
+
+  const orphanedFields = mappedTemplateRecipients
+    .filter((recipient) => isFilteredCreatorRecipient(recipient))
+    .flatMap((recipient) => recipient.fields);
+
+  let finalRecipients: FinalRecipient[] = mappedTemplateRecipients.filter(
+    (recipient) => !isFilteredCreatorRecipient(recipient),
+  );
+
+  if (orphanedFields.length > 0 && finalRecipients.length > 0) {
+    const mergeAtIndex = finalRecipients.findIndex(
       (recipient) =>
-        !(
-          recipient.email.toLowerCase() === normalizedCreatorEmail &&
-          recipient.role !== RecipientRole.CC
-        ),
+        recipient.role === RecipientRole.SIGNER || recipient.role === RecipientRole.APPROVER,
     );
+    const targetIndex = mergeAtIndex === -1 ? 0 : mergeAtIndex;
+
+    finalRecipients = finalRecipients.map((recipient, index) =>
+      index === targetIndex
+        ? { ...recipient, fields: [...recipient.fields, ...orphanedFields] }
+        : recipient,
+    );
+  }
 
   const defaultRecipients = settings.defaultRecipients
     ? ZDefaultRecipientsSchema.parse(settings.defaultRecipients)

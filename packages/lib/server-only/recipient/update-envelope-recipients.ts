@@ -142,7 +142,11 @@ export const updateEnvelopeRecipients = async ({
           ...updateData,
         };
 
+        // Only strip the acting user as a required signer on real documents.
+        // Templates must keep owner rows (and their fields) so editors can pre-fill
+        // fields assigned to themselves without role changes deleting fields.
         const shouldDowngradeOwnerToCC =
+          envelope.type === EnvelopeType.DOCUMENT &&
           mergedRecipient.email.toLowerCase() === normalizedActingUserEmail &&
           mergedRecipient.role !== RecipientRole.CC;
 

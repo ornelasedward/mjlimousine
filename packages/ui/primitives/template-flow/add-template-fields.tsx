@@ -490,8 +490,27 @@ export const AddTemplateFieldsFormPartial = ({
   }, []);
 
   useEffect(() => {
-    setSelectedSigner(recipients[0]);
-  }, [recipients]);
+    const canReceiveInteractiveFields = (recipient: Recipient) =>
+      recipient.role !== RecipientRole.CC &&
+      recipient.role !== RecipientRole.ASSISTANT &&
+      recipient.role !== RecipientRole.VIEWER;
+
+    const normalizedUserEmail = user?.email?.toLowerCase();
+    const selfRecipient = normalizedUserEmail
+      ? recipients.find((recipient) => recipient.email.toLowerCase() === normalizedUserEmail)
+      : undefined;
+
+    const pool = recipients.filter(canReceiveInteractiveFields);
+
+    const nextSelected =
+      (selfRecipient && pool.some((r) => r.id === selfRecipient.id) ? selfRecipient : undefined) ??
+      pool.find((r) => r.sendStatus !== SendStatus.SENT) ??
+      pool[0] ??
+      recipients[0] ??
+      null;
+
+    setSelectedSigner(nextSelected);
+  }, [recipients, user?.email]);
 
   const recipientsByRole = useMemo(() => {
     const recipientsByRole: Record<RecipientRole, Recipient[]> = {
@@ -508,26 +527,6 @@ export const AddTemplateFieldsFormPartial = ({
 
     return recipientsByRole;
   }, [recipients]);
-
-  useEffect(() => {
-    const recipientsByRoleToDisplay = recipients.filter(
-      (recipient) =>
-        recipient.role !== RecipientRole.CC && recipient.role !== RecipientRole.ASSISTANT,
-    );
-
-    const normalizedUserEmail = user?.email?.toLowerCase();
-    const selfRecipient = normalizedUserEmail
-      ? recipientsByRoleToDisplay.find(
-          (recipient) => recipient.email.toLowerCase() === normalizedUserEmail,
-        )
-      : undefined;
-
-    setSelectedSigner(
-      selfRecipient ??
-        recipientsByRoleToDisplay.find((r) => r.sendStatus !== SendStatus.SENT) ??
-        recipientsByRoleToDisplay[0],
-    );
-  }, [recipients, user?.email]);
 
   const recipientsByRoleToDisplay = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -688,7 +687,7 @@ export const AddTemplateFieldsFormPartial = ({
                 </PopoverTrigger>
 
                 <PopoverContent className="p-0" align="start">
-                  <Command value={selectedSigner?.email}>
+                  <Command value={selectedSigner ? String(selectedSigner.id) : ''}>
                     <CommandInput />
 
                     <CommandEmpty>
@@ -716,6 +715,7 @@ export const AddTemplateFieldsFormPartial = ({
                         {roleRecipients.map((recipient) => (
                           <CommandItem
                             key={recipient.id}
+                            value={`${recipient.id}-${recipient.email}`}
                             className={cn(
                               'px-2 last:mb-1 [&:not(:first-child)]:mt-1',
                               getRecipientColorStyles(
