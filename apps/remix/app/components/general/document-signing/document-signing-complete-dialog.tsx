@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trans, useLingui } from '@lingui/react/macro';
@@ -76,7 +76,7 @@ const ZNextSignerFormSchema = z.object({
 type TNextSignerFormSchema = z.infer<typeof ZNextSignerFormSchema>;
 
 const ZDirectRecipientFormSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
 });
 
@@ -126,6 +126,17 @@ export const DocumentSigningCompleteDialog = ({
   });
 
   const isComplete = useMemo(() => !fieldsContainUnsignedRequiredField(fields), [fields]);
+
+  useEffect(() => {
+    if (!showDialog || !recipientPayload) {
+      return;
+    }
+
+    recipientForm.reset({
+      name: recipientPayload.name,
+      email: recipientPayload.email,
+    });
+  }, [showDialog, recipientPayload, recipientForm]);
 
   const completionRequires2FA = useMemo(
     () => derivedRecipientAccessAuth.includes('TWO_FACTOR_AUTH'),

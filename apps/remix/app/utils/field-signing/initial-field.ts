@@ -23,16 +23,26 @@ export const handleInitialsFieldClick = async (
   }
 
   if (field.inserted) {
+    const updatedInitials = await SignFieldInitialsDialog.call({
+      defaultInitials: field.customText || initials || '',
+    });
+
+    if (!updatedInitials || updatedInitials === field.customText) {
+      return null;
+    }
+
     return {
       type: FieldType.INITIALS,
-      value: null,
+      value: updatedInitials,
     };
   }
 
   let initialsToInsert = initials;
 
   if (!initialsToInsert) {
-    initialsToInsert = await SignFieldInitialsDialog.call({});
+    initialsToInsert = await SignFieldInitialsDialog.call({
+      defaultInitials: initials || '',
+    });
   }
 
   if (!initialsToInsert) {
@@ -41,6 +51,6 @@ export const handleInitialsFieldClick = async (
 
   return {
     type: FieldType.INITIALS,
-    value: initials,
+    value: initialsToInsert,
   };
 };

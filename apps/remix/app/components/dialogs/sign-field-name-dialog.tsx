@@ -30,15 +30,15 @@ const ZSignFieldNameFormSchema = z.object({
 type TSignFieldNameFormSchema = z.infer<typeof ZSignFieldNameFormSchema>;
 
 export type SignFieldNameDialogProps = {
-  //
+  defaultName?: string;
 };
 
 export const SignFieldNameDialog = createCallable<SignFieldNameDialogProps, string | null>(
-  ({ call }) => {
+  ({ call, defaultName = '' }) => {
     const form = useForm<TSignFieldNameFormSchema>({
       resolver: zodResolver(ZSignFieldNameFormSchema),
       defaultValues: {
-        name: '',
+        name: defaultName,
       },
     });
 

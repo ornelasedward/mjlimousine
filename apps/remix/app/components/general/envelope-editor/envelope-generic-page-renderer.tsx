@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { useLingui } from '@lingui/react/macro';
-import { DocumentStatus, type Recipient, SigningStatus } from '@prisma/client';
+import { DocumentStatus, type Recipient, type Signature, SigningStatus } from '@prisma/client';
 import type Konva from 'konva';
 
 import { usePageRenderer } from '@documenso/lib/client-only/hooks/use-page-renderer';
@@ -13,6 +13,7 @@ import { EnvelopeRecipientFieldTooltip } from '@documenso/ui/components/document
 
 type GenericLocalField = TEnvelope['fields'][number] & {
   recipient: Pick<Recipient, 'id' | 'name' | 'email' | 'signingStatus'>;
+  signature?: Pick<Signature, 'signatureImageAsBase64' | 'typedSignature'> | null;
 };
 
 export default function EnvelopeGenericPageRenderer() {
@@ -59,19 +60,17 @@ export default function EnvelopeGenericPageRenderer() {
           throw new Error(`Recipient not found for field ${field.id}`);
         }
 
-        const isInserted = recipient.signingStatus === SigningStatus.SIGNED && field.inserted;
-
         return {
           ...field,
-          inserted: isInserted,
-          customText: isInserted ? field.customText : '',
+          inserted: field.inserted,
+          customText: field.inserted ? field.customText : '',
+          signature: field.signature ?? null,
           recipient,
         };
       })
       .filter(
         ({ inserted, fieldMeta, recipient }) =>
-          (recipient.signingStatus === SigningStatus.SIGNED ? inserted : true) ||
-          fieldMeta?.readOnly,
+          inserted || fieldMeta?.readOnly || recipient.signingStatus !== SigningStatus.SIGNED,
       );
   }, [fields, pageContext.pageNumber, currentEnvelopeItem?.id, recipients]);
 
@@ -82,6 +81,16 @@ export default function EnvelopeGenericPageRenderer() {
     }
 
     const fieldTranslations = getClientSideFieldTranslations(i18n);
+
+    const fieldSignature = field.signature
+      ? {
+          signatureImageAsBase64: field.signature.signatureImageAsBase64,
+          typedSignature: field.signature.typedSignature,
+        }
+      : {
+          signatureImageAsBase64: '',
+          typedSignature: field.inserted ? field.customText : fieldTranslations.SIGNATURE,
+        };
 
     renderField({
       scale,
@@ -94,10 +103,7 @@ export default function EnvelopeGenericPageRenderer() {
         positionX: Number(field.positionX),
         positionY: Number(field.positionY),
         fieldMeta: field.fieldMeta,
-        signature: {
-          signatureImageAsBase64: '',
-          typedSignature: fieldTranslations.SIGNATURE,
-        },
+        signature: fieldSignature,
       },
       translations: fieldTranslations,
       pageWidth: unscaledViewport.width,

@@ -23,9 +23,17 @@ export const handleNameFieldClick = async (
   }
 
   if (field.inserted) {
+    const updatedName = await SignFieldNameDialog.call({
+      defaultName: field.customText || name || '',
+    });
+
+    if (!updatedName || updatedName === field.customText) {
+      return null;
+    }
+
     return {
       type: FieldType.NAME,
-      value: null,
+      value: updatedName,
     };
   }
 
@@ -33,7 +41,7 @@ export const handleNameFieldClick = async (
 
   if (!nameToInsert) {
     nameToInsert = await SignFieldNameDialog.call({
-      // Props here.
+      defaultName: name || '',
     });
   }
 

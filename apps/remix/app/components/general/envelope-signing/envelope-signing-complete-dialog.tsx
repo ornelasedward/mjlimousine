@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { useLingui } from '@lingui/react/macro';
-import { FieldType } from '@prisma/client';
+import { type Field, FieldType } from '@prisma/client';
 import { useNavigate, useRevalidator, useSearchParams } from 'react-router';
 
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
@@ -14,6 +14,7 @@ import { trpc } from '@documenso/trpc/react';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 
 import { useEmbedSigningContext } from '~/components/embed/embed-signing-context';
+import { getIdentityFieldsToAutoSign } from '~/utils/field-signing/auto-sign-identity-fields';
 
 import { DocumentSigningCompleteDialog } from '../document-signing/document-signing-complete-dialog';
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
@@ -37,6 +38,7 @@ export const EnvelopeSignerCompleteDialog = () => {
     nextRecipient,
     email,
     fullName,
+    signField,
   } = useRequiredEnvelopeSigningContext();
 
   const { currentEnvelopeItem, setCurrentEnvelopeItem } = useCurrentEnvelopeRender();
@@ -49,8 +51,37 @@ export const EnvelopeSignerCompleteDialog = () => {
   const { mutateAsync: createDocumentFromDirectTemplate } =
     trpc.template.createDocumentFromDirectTemplate.useMutation();
 
-  const handleOnNextFieldClick = () => {
-    const nextField = recipientFieldsRemaining[0];
+  const recipientIdentityFields = useMemo(
+    () =>
+      recipient.fields.filter(
+        (field): field is Field =>
+          field.type === FieldType.NAME ||
+          field.type === FieldType.EMAIL ||
+          field.type === FieldType.INITIALS,
+      ),
+    [recipient.fields],
+  );
+
+  const handleOnNextFieldClick = async () => {
+    const identityFieldsToSign = getIdentityFieldsToAutoSign(recipientIdentityFields, {
+      fullName,
+      email,
+    });
+
+    for (const { field, value } of identityFieldsToSign) {
+      try {
+        await signField(field.id, value);
+      } catch {
+        // Allow manual signing if auto-sign fails.
+      }
+    }
+
+    const autoSignedFieldIds = new Set(identityFieldsToSign.map(({ field }) => field.id));
+    const remainingFields = recipientFieldsRemaining.filter(
+      (field) => !autoSignedFieldIds.has(field.id),
+    );
+
+    const nextField = remainingFields[0];
 
     if (!nextField) {
       setShowPendingFieldTooltip(false);
@@ -241,7 +272,6 @@ export const EnvelopeSignerCompleteDialog = () => {
       allowDictateNextSigner={Boolean(
         nextRecipient && envelope.documentMeta.allowDictateNextSigner,
       )}
-      disableNameInput={!isDirectTemplate && recipient.name !== ''}
       defaultNextSigner={
         nextRecipient ? { name: nextRecipient.name, email: nextRecipient.email } : undefined
       }

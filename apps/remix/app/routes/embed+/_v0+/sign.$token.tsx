@@ -1,6 +1,5 @@
 import { RecipientRole } from '@prisma/client';
 import { data } from 'react-router';
-import { match } from 'ts-pattern';
 
 import { getOptionalSession } from '@documenso/auth/server/lib/utils/get-session';
 import { EnvelopeRenderProvider } from '@documenso/lib/client-only/providers/envelope-render-provider';
@@ -16,7 +15,6 @@ import { getOrganisationClaimByTeamId } from '@documenso/lib/server-only/organis
 import { getIsRecipientsTurnToSign } from '@documenso/lib/server-only/recipient/get-is-recipient-turn';
 import { getRecipientByToken } from '@documenso/lib/server-only/recipient/get-recipient-by-token';
 import { getRecipientsForAssistant } from '@documenso/lib/server-only/recipient/get-recipients-for-assistant';
-import { DocumentAccessAuth } from '@documenso/lib/types/document-auth';
 import { isDocumentCompleted } from '@documenso/lib/utils/document';
 import { extractDocumentAuthMethods } from '@documenso/lib/utils/document-auth';
 import { isRecipientExpired } from '@documenso/lib/utils/recipients';
@@ -346,6 +344,7 @@ const EmbedSignDocumentPageV1 = ({
   return (
     <DocumentSigningProvider
       email={recipient.email}
+      fields={fields}
       fullName={user?.email === recipient.email ? user?.name : recipient.name}
       signature={user?.email === recipient.email ? user?.signature : undefined}
       typedSignatureEnabled={document.documentMeta?.typedSignatureEnabled}

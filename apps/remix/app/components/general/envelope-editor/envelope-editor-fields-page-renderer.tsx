@@ -124,15 +124,24 @@ export default function EnvelopeEditorFieldsPageRenderer() {
     const isFieldEditable =
       recipient !== undefined && canRecipientFieldsBeModified(recipient, envelope.fields);
 
+    const persistedField = envelope.fields.find((persistedField) => persistedField.id === field.id);
+    const persistedSignature = persistedField?.signature ?? null;
+
     const { fieldGroup } = renderField({
       scale,
       pageLayer: pageLayer.current,
       field: {
         renderId: field.formId,
         ...field,
-        customText: '',
-        inserted: false,
+        customText: persistedField?.inserted ? persistedField.customText : '',
+        inserted: persistedField?.inserted ?? false,
         fieldMeta: field.fieldMeta,
+        signature: persistedSignature
+          ? {
+              signatureImageAsBase64: persistedSignature.signatureImageAsBase64,
+              typedSignature: persistedSignature.typedSignature,
+            }
+          : undefined,
       },
       translations: getClientSideFieldTranslations(i18n),
       pageWidth: unscaledViewport.width,

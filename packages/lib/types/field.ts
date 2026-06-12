@@ -2,6 +2,7 @@ import { FieldType, Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import { FieldSchema } from '@documenso/prisma/generated/zod/modelSchema/FieldSchema';
+import { SignatureSchema } from '@documenso/prisma/generated/zod/modelSchema/SignatureSchema';
 
 import {
   FIELD_SIGNATURE_META_DEFAULT_VALUES,
@@ -51,9 +52,16 @@ export const ZFieldSchema = FieldSchema.pick({
   templateId: z.number().nullish(),
 });
 
+export const ZEnvelopeFieldSignatureSchema = SignatureSchema.pick({
+  signatureImageAsBase64: true,
+  typedSignature: true,
+});
+
 export const ZEnvelopeFieldSchema = ZFieldSchema.omit({
   documentId: true,
   templateId: true,
+}).extend({
+  signature: ZEnvelopeFieldSignatureSchema.nullable().optional(),
 });
 
 export const ZFieldPageNumberSchema = z

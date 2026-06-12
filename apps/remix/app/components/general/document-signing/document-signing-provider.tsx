@@ -1,6 +1,9 @@
 import { createContext, useContext, useState } from 'react';
 
+import type { Field } from '@prisma/client';
+
 import { isBase64Image } from '@documenso/lib/constants/signatures';
+import { deriveSigningIdentityValues } from '@documenso/lib/utils/signing-identity';
 
 export type DocumentSigningContextValue = {
   fullName: string;
@@ -30,6 +33,7 @@ export const useRequiredDocumentSigningContext = () => {
 export interface DocumentSigningProviderProps {
   fullName?: string | null;
   email?: string | null;
+  fields?: Field[];
   signature?: string | null;
   typedSignatureEnabled?: boolean;
   uploadSignatureEnabled?: boolean;
@@ -40,14 +44,22 @@ export interface DocumentSigningProviderProps {
 export const DocumentSigningProvider = ({
   fullName: initialFullName,
   email: initialEmail,
+  fields = [],
   signature: initialSignature,
   typedSignatureEnabled = true,
   uploadSignatureEnabled = true,
   drawSignatureEnabled = true,
   children,
 }: DocumentSigningProviderProps) => {
-  const [fullName, setFullName] = useState(initialFullName || '');
-  const [email, setEmail] = useState(initialEmail || '');
+  const initialIdentity = deriveSigningIdentityValues({
+    recipientEmail: initialEmail,
+    fields,
+    fallbackName: initialFullName,
+    fallbackEmail: initialEmail,
+  });
+
+  const [fullName, setFullName] = useState(initialIdentity.fullName);
+  const [email, setEmail] = useState(initialIdentity.email);
 
   // Ensure the user signature doesn't show up if it's not allowed.
   const [signature, setSignature] = useState(

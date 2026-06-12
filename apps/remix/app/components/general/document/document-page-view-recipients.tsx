@@ -167,30 +167,40 @@ export const DocumentPageViewRecipients = ({
               {envelope.status !== DocumentStatus.DRAFT &&
                 recipient.signingStatus === SigningStatus.NOT_SIGNED &&
                 !isRecipientExpired(recipient) &&
-                (recipient.expiresAt ? (
-                  <PopoverHover
-                    trigger={
-                      <Badge variant="secondary">
-                        <Clock className="mr-1 h-3 w-3" />
-                        <Trans>Pending</Trans>
-                      </Badge>
-                    }
-                  >
-                    <p className="text-xs text-muted-foreground">
-                      <Trans>
-                        Expires{' '}
-                        {recipient.expiresAt
-                          ? i18n.date(recipient.expiresAt, DateTime.DATETIME_MED)
-                          : 'N/A'}
-                      </Trans>
-                    </p>
-                  </PopoverHover>
-                ) : (
-                  <Badge variant="secondary">
-                    <Clock className="mr-1 h-3 w-3" />
-                    <Trans>Pending</Trans>
-                  </Badge>
-                ))}
+                (() => {
+                  const recipientHasFieldProgress = envelope.fields.some(
+                    (field) => field.recipientId === recipient.id && field.inserted,
+                  );
+
+                  const statusBadge = recipientHasFieldProgress ? (
+                    <Badge variant="default">
+                      <PenIcon className="mr-1 h-3 w-3" />
+                      <Trans>In progress</Trans>
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">
+                      <Clock className="mr-1 h-3 w-3" />
+                      <Trans>Pending</Trans>
+                    </Badge>
+                  );
+
+                  if (!recipient.expiresAt) {
+                    return statusBadge;
+                  }
+
+                  return (
+                    <PopoverHover trigger={statusBadge}>
+                      <p className="text-xs text-muted-foreground">
+                        <Trans>
+                          Expires{' '}
+                          {recipient.expiresAt
+                            ? i18n.date(recipient.expiresAt, DateTime.DATETIME_MED)
+                            : 'N/A'}
+                        </Trans>
+                      </p>
+                    </PopoverHover>
+                  );
+                })()}
 
               {envelope.status !== DocumentStatus.DRAFT &&
                 recipient.signingStatus === SigningStatus.REJECTED && (

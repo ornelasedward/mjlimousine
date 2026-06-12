@@ -31,15 +31,15 @@ const ZSignFieldInitialsFormSchema = z.object({
 type TSignFieldInitialsFormSchema = z.infer<typeof ZSignFieldInitialsFormSchema>;
 
 export type SignFieldInitialsDialogProps = {
-  //
+  defaultInitials?: string;
 };
 
 export const SignFieldInitialsDialog = createCallable<SignFieldInitialsDialogProps, string | null>(
-  ({ call }) => {
+  ({ call, defaultInitials = '' }) => {
     const form = useForm<TSignFieldInitialsFormSchema>({
       resolver: zodResolver(ZSignFieldInitialsFormSchema),
       defaultValues: {
-        initials: '',
+        initials: defaultInitials,
       },
     });
 

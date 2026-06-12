@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import React from 'react';
 
-import type { Field, Recipient } from '@prisma/client';
+import type { Recipient } from '@prisma/client';
 
 import type { TRecipientColor } from '@documenso/ui/lib/recipient-colors';
 import { AVAILABLE_RECIPIENT_COLORS } from '@documenso/ui/lib/recipient-colors';
@@ -34,7 +34,7 @@ type EnvelopeRenderProviderValue = {
   envelopeType: TEnvelope['type'];
   currentEnvelopeItem: EnvelopeRenderItem | null;
   setCurrentEnvelopeItem: (envelopeItemId: string) => void;
-  fields: Field[];
+  fields: TEnvelope['fields'];
   recipients: Pick<Recipient, 'id' | 'name' | 'email' | 'signingStatus'>[];
   getRecipientColorKey: (recipientId: number) => TRecipientColor;
 
@@ -53,7 +53,7 @@ interface EnvelopeRenderProviderProps {
    *
    * Only pass if the CustomRenderer you are passing in wants fields.
    */
-  fields?: Field[];
+  fields?: TEnvelope['fields'];
 
   /**
    * Optional recipient used to determine the color of the fields and hover

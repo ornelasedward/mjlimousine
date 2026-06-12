@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { Plural, Trans } from '@lingui/react/macro';
-import { RecipientRole } from '@prisma/client';
+import { FieldType, RecipientRole } from '@prisma/client';
 
 import { isSignatureFieldType } from '@documenso/prisma/guards/is-signature-field';
 import { Input } from '@documenso/ui/primitives/input';
@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@documenso/ui/primitives/radio-group
 import { SignaturePadDialog } from '@documenso/ui/primitives/signature-pad/signature-pad-dialog';
 
 import { useEmbedSigningContext } from '~/components/embed/embed-signing-context';
+import { getIdentityFieldsToAutoSign } from '~/utils/field-signing/auto-sign-identity-fields';
 
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
 
@@ -26,6 +27,8 @@ export default function EnvelopeSignerForm() {
     assistantRecipients,
     selectedAssistantRecipient,
     setSelectedAssistantRecipientId,
+    signField,
+    email,
   } = useRequiredEnvelopeSigningContext();
 
   const { isNameLocked, isEmailLocked } = useEmbedSigningContext() || {};
@@ -35,6 +38,34 @@ export default function EnvelopeSignerForm() {
   }, [recipientFields]);
 
   const isSubmitting = false;
+
+  const handleFullNameBlur = () => {
+    const trimmedFullName = fullName.trim();
+
+    if (!trimmedFullName) {
+      return;
+    }
+
+    const fieldsToSign = getIdentityFieldsToAutoSign(
+      recipientFields.filter(
+        (field) =>
+          field.type === FieldType.NAME ||
+          field.type === FieldType.EMAIL ||
+          field.type === FieldType.INITIALS,
+      ),
+      { fullName: trimmedFullName, email },
+    );
+
+    void Promise.all(
+      fieldsToSign.map(async ({ field, value }) => {
+        try {
+          await signField(field.id, value);
+        } catch {
+          // Allow manual signing if auto-sign fails.
+        }
+      }),
+    );
+  };
 
   if (recipient.role === RecipientRole.VIEWER) {
     return null;
@@ -108,6 +139,7 @@ export default function EnvelopeSignerForm() {
             value={fullName}
             disabled={isNameLocked}
             onChange={(e) => !isNameLocked && setFullName(e.target.value.trimStart())}
+            onBlur={handleFullNameBlur}
           />
         </div>
 

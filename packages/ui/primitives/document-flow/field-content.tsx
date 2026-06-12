@@ -26,7 +26,7 @@ type FieldIconProps = {
     customText?: string;
     type: FieldType;
     fieldMeta?: TFieldMetaSchema | null;
-    signature?: Signature | null;
+    signature?: Pick<Signature, 'signatureImageAsBase64' | 'typedSignature'> | null;
   };
   documentMeta?: Pick<DocumentMeta, 'dateFormat'>;
 };

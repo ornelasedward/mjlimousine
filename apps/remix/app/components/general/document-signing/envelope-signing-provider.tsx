@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EnvelopeType,
@@ -19,8 +19,11 @@ import {
   isRequiredField,
 } from '@documenso/lib/utils/advanced-fields-helpers';
 import { extractFieldInsertionValues } from '@documenso/lib/utils/envelope-signing';
+import { deriveSigningIdentityValues } from '@documenso/lib/utils/signing-identity';
 import { trpc } from '@documenso/trpc/react';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
+
+import { getIdentityFieldsToAutoSign } from '~/utils/field-signing/auto-sign-identity-fields';
 
 export type EnvelopeSigningContextValue = {
   isDirectTemplate: boolean;
@@ -94,8 +97,16 @@ export const EnvelopeSigningProvider = ({
 
   const { envelope, recipient } = envelopeData;
 
-  const [fullName, setFullName] = useState(initialFullName || '');
-  const [email, setEmail] = useState(initialEmail || '');
+  const initialIdentity = deriveSigningIdentityValues({
+    recipientName: recipient.name,
+    recipientEmail: recipient.email,
+    fields: envelopeData.recipient.fields,
+    fallbackName: initialFullName,
+    fallbackEmail: initialEmail,
+  });
+
+  const [fullName, setFullName] = useState(initialIdentity.fullName);
+  const [email, setEmail] = useState(initialIdentity.email);
 
   const [showPendingFieldTooltip, setShowPendingFieldTooltip] = useState(false);
 
@@ -209,6 +220,8 @@ export const EnvelopeSigningProvider = ({
   const recipientFields = useMemo(() => {
     return envelopeData.recipient.fields;
   }, [envelopeData.recipient.fields]);
+
+  const hasAutoSignedIdentityFieldsOnMount = useRef(false);
 
   /**
    * Assistant recipients are those that have a signing order after the assistant.
@@ -369,6 +382,42 @@ export const EnvelopeSigningProvider = ({
 
     return updatedField;
   };
+
+  /**
+   * Auto-insert name, email, and initials fields when identity values are already known.
+   */
+  useEffect(() => {
+    if (hasAutoSignedIdentityFieldsOnMount.current) {
+      return;
+    }
+
+    if (recipient.role === RecipientRole.ASSISTANT) {
+      return;
+    }
+
+    const fieldsToSign = getIdentityFieldsToAutoSign(
+      envelopeData.recipient.fields.filter((field) => isFieldUnsignedAndRequired(field)),
+      { fullName, email },
+    );
+
+    hasAutoSignedIdentityFieldsOnMount.current = true;
+
+    if (fieldsToSign.length === 0) {
+      return;
+    }
+
+    void Promise.all(
+      fieldsToSign.map(async ({ field, value }) => {
+        try {
+          await signField(field.id, value);
+        } catch {
+          // Allow manual signing if auto-sign fails.
+        }
+      }),
+    );
+    // Only run once on mount with the initial identity values provided to the provider.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <EnvelopeSigningContext.Provider

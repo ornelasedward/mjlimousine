@@ -34,14 +34,15 @@ type TSignFieldEmailFormSchema = z.infer<typeof ZSignFieldEmailFormSchema>;
 
 export type SignFieldEmailDialogProps = {
   placeholderEmail: string | null;
+  defaultEmail?: string;
 };
 
 export const SignFieldEmailDialog = createCallable<SignFieldEmailDialogProps, string | null>(
-  ({ call, placeholderEmail }) => {
+  ({ call, placeholderEmail, defaultEmail }) => {
     const form = useForm<TSignFieldEmailFormSchema>({
       resolver: zodResolver(ZSignFieldEmailFormSchema),
       defaultValues: {
-        email: placeholderEmail || '',
+        email: defaultEmail || placeholderEmail || '',
       },
     });
 

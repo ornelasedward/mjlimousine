@@ -163,7 +163,9 @@ export function EnvelopeRecipientFieldTooltip({
                 ? 'neutral'
                 : field.recipient.signingStatus === SigningStatus.SIGNED
                   ? 'default'
-                  : 'secondary'
+                  : field.inserted
+                    ? 'default'
+                    : 'secondary'
             }
           >
             {field?.fieldMeta?.readOnly ? (
@@ -175,6 +177,11 @@ export function EnvelopeRecipientFieldTooltip({
               <>
                 <SignatureIcon className="mr-1 h-3 w-3" />
                 <Trans>Signed</Trans>
+              </>
+            ) : field.inserted ? (
+              <>
+                <ClockIcon className="mr-1 h-3 w-3" />
+                <Trans>In progress</Trans>
               </>
             ) : (
               <>
@@ -191,7 +198,7 @@ export function EnvelopeRecipientFieldTooltip({
           </span>
         </p>
 
-        <p className="text-muted-foreground mt-1 text-center text-xs">
+        <p className="mt-1 text-center text-xs text-muted-foreground">
           {getRecipientDisplayText(field.recipient)}
         </p>
 

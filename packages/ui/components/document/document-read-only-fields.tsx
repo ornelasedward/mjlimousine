@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
-import type { DocumentMeta, Field, Recipient } from '@prisma/client';
+import type { DocumentMeta, Field, Recipient, Signature } from '@prisma/client';
 import { SigningStatus } from '@prisma/client';
 import { Clock, EyeOffIcon } from 'lucide-react';
 
@@ -33,8 +33,11 @@ const getRecipientDisplayText = (recipient: { name: string; email: string }) => 
   return recipient.email;
 };
 
+type DocumentFieldSignature = Pick<Signature, 'signatureImageAsBase64' | 'typedSignature'>;
+
 export type DocumentField = Field & {
   recipient: Pick<Recipient, 'name' | 'email' | 'signingStatus'>;
+  signature?: DocumentFieldSignature | null;
 };
 
 export type DocumentReadOnlyFieldsProps = {
@@ -67,7 +70,7 @@ export type DocumentReadOnlyFieldsProps = {
 };
 
 export const mapFieldsWithRecipients = (
-  fields: Field[],
+  fields: Array<Field & { signature?: DocumentFieldSignature | null }>,
   recipients: Recipient[],
 ): DocumentField[] => {
   return fields.map((field) => {
@@ -78,7 +81,7 @@ export const mapFieldsWithRecipients = (
       signingStatus: SigningStatus.NOT_SIGNED,
     };
 
-    return { ...field, recipient, signature: null };
+    return { ...field, recipient, signature: field.signature ?? null };
   });
 };
 
@@ -140,13 +143,20 @@ export const DocumentReadOnlyFields = ({
                         variant={
                           field.recipient.signingStatus === SigningStatus.SIGNED
                             ? 'default'
-                            : 'secondary'
+                            : field.inserted
+                              ? 'default'
+                              : 'secondary'
                         }
                       >
                         {field.recipient.signingStatus === SigningStatus.SIGNED ? (
                           <>
                             <SignatureIcon className="mr-1 h-3 w-3" />
                             <Trans>Signed</Trans>
+                          </>
+                        ) : field.inserted ? (
+                          <>
+                            <Clock className="mr-1 h-3 w-3" />
+                            <Trans>In progress</Trans>
                           </>
                         ) : (
                           <>
@@ -163,7 +173,7 @@ export const DocumentReadOnlyFields = ({
                       </span>
                     </p>
 
-                    <p className="text-muted-foreground mt-1 text-center text-xs">
+                    <p className="mt-1 text-center text-xs text-muted-foreground">
                       {getRecipientDisplayText(field.recipient)}
                     </p>
 

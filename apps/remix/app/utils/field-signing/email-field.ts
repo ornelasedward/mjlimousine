@@ -24,9 +24,18 @@ export const handleEmailFieldClick = async (
   }
 
   if (field.inserted) {
+    const updatedEmail = await SignFieldEmailDialog.call({
+      placeholderEmail,
+      defaultEmail: field.customText || email || placeholderEmail || '',
+    });
+
+    if (!updatedEmail || updatedEmail.toLowerCase() === field.customText?.toLowerCase()) {
+      return null;
+    }
+
     return {
       type: FieldType.EMAIL,
-      value: null,
+      value: updatedEmail,
     };
   }
 
@@ -35,6 +44,7 @@ export const handleEmailFieldClick = async (
   if (!emailToInsert) {
     emailToInsert = await SignFieldEmailDialog.call({
       placeholderEmail,
+      defaultEmail: email || placeholderEmail || '',
     });
   }
 

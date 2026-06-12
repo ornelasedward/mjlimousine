@@ -3,16 +3,18 @@ import { useId, useMemo, useState } from 'react';
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
-import { type Field, type Recipient, RecipientRole } from '@prisma/client';
+import { type Field, FieldType, type Recipient, RecipientRole } from '@prisma/client';
 import { Controller, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { useNavigate, useRevalidator } from 'react-router';
 
+import { DO_NOT_INVALIDATE_QUERY_ON_MUTATION } from '@documenso/lib/constants/trpc';
 import type { DocumentAndSender } from '@documenso/lib/server-only/document/get-document-by-token';
 import type { TRecipientAccessAuth } from '@documenso/lib/types/document-auth';
 import { isFieldUnsignedAndRequired } from '@documenso/lib/utils/advanced-fields-helpers';
 import { sortFieldsByPosition } from '@documenso/lib/utils/fields';
 import { isSignatureFieldType } from '@documenso/prisma/guards/is-signature-field';
 import type { RecipientWithFields } from '@documenso/prisma/types/recipient-with-fields';
+import { trpc } from '@documenso/trpc/react';
 import { FieldToolTip } from '@documenso/ui/components/field/field-tooltip';
 import { Button } from '@documenso/ui/primitives/button';
 import { Input } from '@documenso/ui/primitives/input';
@@ -20,6 +22,8 @@ import { Label } from '@documenso/ui/primitives/label';
 import { RadioGroup, RadioGroupItem } from '@documenso/ui/primitives/radio-group';
 import { SignaturePadDialog } from '@documenso/ui/primitives/signature-pad/signature-pad-dialog';
 import { useToast } from '@documenso/ui/primitives/use-toast';
+
+import { getIdentityFieldsToAutoSign } from '~/utils/field-signing/auto-sign-identity-fields';
 
 import {
   AssistantConfirmationDialog,
@@ -59,10 +63,16 @@ export const DocumentSigningForm = ({
   const { _ } = useLingui();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { revalidate } = useRevalidator();
+
+  const { mutateAsync: signFieldWithToken } = trpc.field.signFieldWithToken.useMutation(
+    DO_NOT_INVALIDATE_QUERY_ON_MUTATION,
+  );
 
   const assistantSignersId = useId();
 
-  const { fullName, signature, setFullName, setSignature } = useRequiredDocumentSigningContext();
+  const { fullName, email, signature, setFullName, setSignature } =
+    useRequiredDocumentSigningContext();
 
   const [validateUninsertedFields, setValidateUninsertedFields] = useState(false);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
@@ -89,9 +99,57 @@ export const DocumentSigningForm = ({
     return fieldsRequiringValidation.filter((field) => field.recipientId === recipient.id);
   }, [fieldsRequiringValidation, recipient]);
 
-  const localFieldsValidated = () => {
+  const autoSignIdentityFields = async () => {
+    const identityFields = fields.filter(
+      (field) =>
+        field.recipientId === recipient.id &&
+        (field.type === FieldType.NAME ||
+          field.type === FieldType.EMAIL ||
+          field.type === FieldType.INITIALS),
+    );
+
+    const fieldsToSign = getIdentityFieldsToAutoSign(identityFields, {
+      fullName,
+      email,
+    });
+
+    if (fieldsToSign.length === 0) {
+      return;
+    }
+
+    await Promise.all(
+      fieldsToSign.map(async ({ field, value }) => {
+        const fieldValue =
+          value.type === FieldType.NAME ||
+          value.type === FieldType.EMAIL ||
+          value.type === FieldType.INITIALS
+            ? value.value
+            : null;
+
+        if (!fieldValue) {
+          return;
+        }
+
+        await signFieldWithToken({
+          token: recipient.token,
+          fieldId: field.id,
+          value: fieldValue,
+          isBase64: false,
+        });
+      }),
+    );
+
+    await revalidate();
+  };
+
+  const localFieldsValidated = async () => {
+    await autoSignIdentityFields();
     setValidateUninsertedFields(true);
     fieldsValidated();
+  };
+
+  const handleFullNameBlur = () => {
+    void autoSignIdentityFields();
   };
 
   const onAssistantFormSubmit = () => {
@@ -269,6 +327,7 @@ export const DocumentSigningForm = ({
                       className="mt-2 bg-background"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value.trimStart())}
+                      onBlur={handleFullNameBlur}
                     />
                   </div>
 
