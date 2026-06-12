@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import {
   EnvelopeType,
@@ -10,6 +10,7 @@ import {
 } from '@prisma/client';
 import { prop, sortBy } from 'remeda';
 
+import { useDebouncedValue } from '@documenso/lib/client-only/hooks/use-debounced-value';
 import { isBase64Image } from '@documenso/lib/constants/signatures';
 import { DO_NOT_INVALIDATE_QUERY_ON_MUTATION } from '@documenso/lib/constants/trpc';
 import type { EnvelopeForSigningResponse } from '@documenso/lib/server-only/envelope/get-envelope-for-recipient-signing';
@@ -23,7 +24,7 @@ import { deriveSigningIdentityValues } from '@documenso/lib/utils/signing-identi
 import { trpc } from '@documenso/trpc/react';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
 
-import { getIdentityFieldsToAutoSign } from '~/utils/field-signing/auto-sign-identity-fields';
+import { autoSignIdentityFields } from '~/utils/field-signing/auto-sign-identity-fields';
 
 export type EnvelopeSigningContextValue = {
   isDirectTemplate: boolean;
@@ -60,6 +61,8 @@ export type EnvelopeSigningContextValue = {
     _value: TSignEnvelopeFieldValue,
     authOptions?: TRecipientActionAuth,
   ) => Promise<Pick<Field, 'id' | 'inserted'>>;
+
+  signRecipientIdentityFields: () => Promise<number[]>;
 };
 
 const EnvelopeSigningContext = createContext<EnvelopeSigningContextValue | null>(null);
@@ -221,7 +224,8 @@ export const EnvelopeSigningProvider = ({
     return envelopeData.recipient.fields;
   }, [envelopeData.recipient.fields]);
 
-  const hasAutoSignedIdentityFieldsOnMount = useRef(false);
+  const debouncedFullName = useDebouncedValue(fullName.trim(), 300);
+  const debouncedEmail = useDebouncedValue(email.trim(), 300);
 
   /**
    * Assistant recipients are those that have a signing order after the assistant.
@@ -324,6 +328,27 @@ export const EnvelopeSigningProvider = ({
     return signedField;
   };
 
+  const signRecipientIdentityFields = async () => {
+    if (recipient.role === RecipientRole.ASSISTANT) {
+      return [];
+    }
+
+    const identityContext = {
+      fullName: fullName.trim(),
+      email: email.trim(),
+    };
+
+    if (!identityContext.fullName && !identityContext.email) {
+      return [];
+    }
+
+    return await autoSignIdentityFields({
+      fields: envelopeData.recipient.fields.filter((field) => isFieldUnsignedAndRequired(field)),
+      context: identityContext,
+      signField: async (fieldId, value) => signField(fieldId, value),
+    });
+  };
+
   const handleDirectTemplateFieldInsertion = (
     fieldId: number,
     fieldValue: TSignEnvelopeFieldValue,
@@ -384,40 +409,23 @@ export const EnvelopeSigningProvider = ({
   };
 
   /**
-   * Auto-insert name, email, and initials fields when identity values are already known.
+   * Auto-insert name, email, and initials fields whenever identity values are known.
    */
   useEffect(() => {
-    if (hasAutoSignedIdentityFieldsOnMount.current) {
-      return;
-    }
-
     if (recipient.role === RecipientRole.ASSISTANT) {
       return;
     }
 
-    const fieldsToSign = getIdentityFieldsToAutoSign(
-      envelopeData.recipient.fields.filter((field) => isFieldUnsignedAndRequired(field)),
-      { fullName, email },
-    );
-
-    hasAutoSignedIdentityFieldsOnMount.current = true;
-
-    if (fieldsToSign.length === 0) {
+    if (!debouncedFullName && !debouncedEmail) {
       return;
     }
 
-    void Promise.all(
-      fieldsToSign.map(async ({ field, value }) => {
-        try {
-          await signField(field.id, value);
-        } catch {
-          // Allow manual signing if auto-sign fails.
-        }
-      }),
-    );
-    // Only run once on mount with the initial identity values provided to the provider.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void autoSignIdentityFields({
+      fields: envelopeData.recipient.fields.filter((field) => isFieldUnsignedAndRequired(field)),
+      context: { fullName: debouncedFullName, email: debouncedEmail },
+      signField: async (fieldId, value) => signField(fieldId, value),
+    });
+  }, [debouncedFullName, debouncedEmail, envelopeData.recipient.fields, recipient.role]);
 
   return (
     <EnvelopeSigningContext.Provider
@@ -449,6 +457,7 @@ export const EnvelopeSigningProvider = ({
         selectedAssistantRecipientFields,
 
         signField,
+        signRecipientIdentityFields,
       }}
     >
       {children}

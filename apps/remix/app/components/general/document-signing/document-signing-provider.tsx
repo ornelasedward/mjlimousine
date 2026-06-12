@@ -32,6 +32,7 @@ export const useRequiredDocumentSigningContext = () => {
 
 export interface DocumentSigningProviderProps {
   fullName?: string | null;
+  recipientName?: string | null;
   email?: string | null;
   fields?: Field[];
   signature?: string | null;
@@ -43,6 +44,7 @@ export interface DocumentSigningProviderProps {
 
 export const DocumentSigningProvider = ({
   fullName: initialFullName,
+  recipientName: initialRecipientName,
   email: initialEmail,
   fields = [],
   signature: initialSignature,
@@ -52,6 +54,7 @@ export const DocumentSigningProvider = ({
   children,
 }: DocumentSigningProviderProps) => {
   const initialIdentity = deriveSigningIdentityValues({
+    recipientName: initialRecipientName ?? initialFullName,
     recipientEmail: initialEmail,
     fields,
     fallbackName: initialFullName,

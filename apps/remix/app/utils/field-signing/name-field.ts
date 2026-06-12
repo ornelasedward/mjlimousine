@@ -41,7 +41,7 @@ export const handleNameFieldClick = async (
 
   if (!nameToInsert) {
     nameToInsert = await SignFieldNameDialog.call({
-      defaultName: name || '',
+      defaultName: field.customText || name || '',
     });
   }
 

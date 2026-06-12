@@ -79,3 +79,33 @@ export const getIdentityFieldsToAutoSign = (
     .map((field) => getIdentityFieldAutoSignPayload(field, context))
     .filter((payload): payload is IdentityFieldAutoSignPayload => payload !== null);
 };
+
+type AutoSignIdentityFieldsOptions = {
+  fields: Field[];
+  context: IdentityFieldContext;
+  signField: (fieldId: number, value: TSignEnvelopeFieldValue) => Promise<unknown>;
+};
+
+/**
+ * Signs all identity fields that can be derived from the current name/email context.
+ * Returns the field IDs that were successfully signed.
+ */
+export const autoSignIdentityFields = async ({
+  fields,
+  context,
+  signField,
+}: AutoSignIdentityFieldsOptions): Promise<number[]> => {
+  const payloads = getIdentityFieldsToAutoSign(fields, context);
+  const signedFieldIds: number[] = [];
+
+  for (const { field, value } of payloads) {
+    try {
+      await signField(field.id, value);
+      signedFieldIds.push(field.id);
+    } catch {
+      // Allow manual signing if auto-sign fails.
+    }
+  }
+
+  return signedFieldIds;
+};

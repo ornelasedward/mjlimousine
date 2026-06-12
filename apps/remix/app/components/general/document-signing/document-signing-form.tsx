@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
@@ -7,6 +7,7 @@ import { type Field, FieldType, type Recipient, RecipientRole } from '@prisma/cl
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useRevalidator } from 'react-router';
 
+import { useDebouncedValue } from '@documenso/lib/client-only/hooks/use-debounced-value';
 import { DO_NOT_INVALIDATE_QUERY_ON_MUTATION } from '@documenso/lib/constants/trpc';
 import type { DocumentAndSender } from '@documenso/lib/server-only/document/get-document-by-token';
 import type { TRecipientAccessAuth } from '@documenso/lib/types/document-auth';
@@ -23,7 +24,7 @@ import { RadioGroup, RadioGroupItem } from '@documenso/ui/primitives/radio-group
 import { SignaturePadDialog } from '@documenso/ui/primitives/signature-pad/signature-pad-dialog';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 
-import { getIdentityFieldsToAutoSign } from '~/utils/field-signing/auto-sign-identity-fields';
+import { autoSignIdentityFields } from '~/utils/field-signing/auto-sign-identity-fields';
 
 import {
   AssistantConfirmationDialog,
@@ -74,9 +75,17 @@ export const DocumentSigningForm = ({
   const { fullName, email, signature, setFullName, setSignature } =
     useRequiredDocumentSigningContext();
 
+  const [localFields, setLocalFields] = useState(fields);
   const [validateUninsertedFields, setValidateUninsertedFields] = useState(false);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
   const [isAssistantSubmitting, setIsAssistantSubmitting] = useState(false);
+
+  useEffect(() => {
+    setLocalFields(fields);
+  }, [fields]);
+
+  const debouncedFullName = useDebouncedValue(fullName.trim(), 300);
+  const debouncedEmail = useDebouncedValue(email.trim(), 300);
 
   const assistantForm = useForm<{ selectedSignerId: number | undefined }>({
     defaultValues: {
@@ -85,11 +94,11 @@ export const DocumentSigningForm = ({
   });
 
   const fieldsRequiringValidation = useMemo(
-    () => fields.filter(isFieldUnsignedAndRequired),
-    [fields],
+    () => localFields.filter(isFieldUnsignedAndRequired),
+    [localFields],
   );
 
-  const hasSignatureField = fields.some((field) => isSignatureFieldType(field.type));
+  const hasSignatureField = localFields.some((field) => isSignatureFieldType(field.type));
 
   const uninsertedFields = useMemo(() => {
     return sortFieldsByPosition(fieldsRequiringValidation.filter((field) => !field.inserted));
@@ -99,8 +108,8 @@ export const DocumentSigningForm = ({
     return fieldsRequiringValidation.filter((field) => field.recipientId === recipient.id);
   }, [fieldsRequiringValidation, recipient]);
 
-  const autoSignIdentityFields = async () => {
-    const identityFields = fields.filter(
+  const autoSignIdentityFieldsForRecipient = async () => {
+    const identityFields = localFields.filter(
       (field) =>
         field.recipientId === recipient.id &&
         (field.type === FieldType.NAME ||
@@ -108,17 +117,10 @@ export const DocumentSigningForm = ({
           field.type === FieldType.INITIALS),
     );
 
-    const fieldsToSign = getIdentityFieldsToAutoSign(identityFields, {
-      fullName,
-      email,
-    });
-
-    if (fieldsToSign.length === 0) {
-      return;
-    }
-
-    await Promise.all(
-      fieldsToSign.map(async ({ field, value }) => {
+    const signedFieldIds = await autoSignIdentityFields({
+      fields: identityFields,
+      context: { fullName: fullName.trim(), email: email.trim() },
+      signField: async (fieldId, value) => {
         const fieldValue =
           value.type === FieldType.NAME ||
           value.type === FieldType.EMAIL ||
@@ -130,26 +132,51 @@ export const DocumentSigningForm = ({
           return;
         }
 
-        await signFieldWithToken({
+        const updatedField = await signFieldWithToken({
           token: recipient.token,
-          fieldId: field.id,
+          fieldId,
           value: fieldValue,
           isBase64: false,
         });
-      }),
-    );
 
-    await revalidate();
+        setLocalFields((prev) =>
+          prev.map((field) => (field.id === updatedField.id ? updatedField : field)),
+        );
+      },
+    });
+
+    if (signedFieldIds.length > 0) {
+      void revalidate();
+    }
+
+    return signedFieldIds;
   };
 
+  useEffect(() => {
+    if (!debouncedFullName && !debouncedEmail) {
+      return;
+    }
+
+    void autoSignIdentityFieldsForRecipient();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedFullName, debouncedEmail, localFields]);
+
   const localFieldsValidated = async () => {
-    await autoSignIdentityFields();
+    await autoSignIdentityFieldsForRecipient();
     setValidateUninsertedFields(true);
     fieldsValidated();
   };
 
   const handleFullNameBlur = () => {
-    void autoSignIdentityFields();
+    void autoSignIdentityFieldsForRecipient();
+  };
+
+  const handleCompleteDocument = async (options: {
+    accessAuthOptions?: TRecipientAccessAuth;
+    nextSigner?: { email: string; name: string };
+  }) => {
+    await autoSignIdentityFieldsForRecipient();
+    await completeDocument(options);
   };
 
   const onAssistantFormSubmit = () => {
@@ -206,10 +233,10 @@ export const DocumentSigningForm = ({
                   <DocumentSigningCompleteDialog
                     isSubmitting={isSubmitting}
                     documentTitle={document.title}
-                    fields={fields}
+                    fields={localFields}
                     fieldsValidated={localFieldsValidated}
                     onSignatureComplete={async (nextSigner, accessAuthOptions) =>
-                      completeDocument({ nextSigner, accessAuthOptions })
+                      handleCompleteDocument({ nextSigner, accessAuthOptions })
                     }
                     recipient={recipient}
                     allowDictateNextSigner={document.documentMeta?.allowDictateNextSigner}
@@ -367,11 +394,11 @@ export const DocumentSigningForm = ({
                 <DocumentSigningCompleteDialog
                   isSubmitting={isSubmitting || isAssistantSubmitting}
                   documentTitle={document.title}
-                  fields={fields}
+                  fields={localFields}
                   fieldsValidated={localFieldsValidated}
                   disabled={!isRecipientsTurn}
                   onSignatureComplete={async (nextSigner, accessAuthOptions) =>
-                    completeDocument({
+                    handleCompleteDocument({
                       accessAuthOptions,
                       nextSigner,
                     })

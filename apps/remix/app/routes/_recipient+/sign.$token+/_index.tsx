@@ -385,6 +385,7 @@ const SigningPageV1 = ({ data }: { data: Awaited<ReturnType<typeof handleV1Loade
   return (
     <DocumentSigningProvider
       email={recipient.email}
+      recipientName={recipient.name}
       fields={fields}
       fullName={user?.email === recipient.email ? user?.name : recipient.name}
       signature={user?.email === recipient.email ? user?.signature : undefined}

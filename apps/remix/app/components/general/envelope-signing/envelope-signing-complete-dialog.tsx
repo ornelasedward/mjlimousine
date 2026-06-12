@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { useLingui } from '@lingui/react/macro';
-import { type Field, FieldType } from '@prisma/client';
+import { FieldType } from '@prisma/client';
 import { useNavigate, useRevalidator, useSearchParams } from 'react-router';
 
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
@@ -14,7 +14,6 @@ import { trpc } from '@documenso/trpc/react';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 
 import { useEmbedSigningContext } from '~/components/embed/embed-signing-context';
-import { getIdentityFieldsToAutoSign } from '~/utils/field-signing/auto-sign-identity-fields';
 
 import { DocumentSigningCompleteDialog } from '../document-signing/document-signing-complete-dialog';
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
@@ -38,7 +37,7 @@ export const EnvelopeSignerCompleteDialog = () => {
     nextRecipient,
     email,
     fullName,
-    signField,
+    signRecipientIdentityFields,
   } = useRequiredEnvelopeSigningContext();
 
   const { currentEnvelopeItem, setCurrentEnvelopeItem } = useCurrentEnvelopeRender();
@@ -51,34 +50,11 @@ export const EnvelopeSignerCompleteDialog = () => {
   const { mutateAsync: createDocumentFromDirectTemplate } =
     trpc.template.createDocumentFromDirectTemplate.useMutation();
 
-  const recipientIdentityFields = useMemo(
-    () =>
-      recipient.fields.filter(
-        (field): field is Field =>
-          field.type === FieldType.NAME ||
-          field.type === FieldType.EMAIL ||
-          field.type === FieldType.INITIALS,
-      ),
-    [recipient.fields],
-  );
-
   const handleOnNextFieldClick = async () => {
-    const identityFieldsToSign = getIdentityFieldsToAutoSign(recipientIdentityFields, {
-      fullName,
-      email,
-    });
+    const signedFieldIds = await signRecipientIdentityFields();
 
-    for (const { field, value } of identityFieldsToSign) {
-      try {
-        await signField(field.id, value);
-      } catch {
-        // Allow manual signing if auto-sign fails.
-      }
-    }
-
-    const autoSignedFieldIds = new Set(identityFieldsToSign.map(({ field }) => field.id));
     const remainingFields = recipientFieldsRemaining.filter(
-      (field) => !autoSignedFieldIds.has(field.id),
+      (field) => !signedFieldIds.includes(field.id),
     );
 
     const nextField = remainingFields[0];
@@ -114,6 +90,8 @@ export const EnvelopeSignerCompleteDialog = () => {
     recipientDetails?: { name: string; email: string },
   ) => {
     try {
+      await signRecipientIdentityFields();
+
       await completeDocument({
         token: recipient.token,
         documentId: mapSecondaryIdToDocumentId(envelope.secondaryId),
@@ -172,6 +150,8 @@ export const EnvelopeSignerCompleteDialog = () => {
     recipientDetails?: { name: string; email: string },
   ) => {
     try {
+      await signRecipientIdentityFields();
+
       let directTemplateExternalId = searchParams?.get('externalId') || undefined;
 
       if (directTemplateExternalId) {
