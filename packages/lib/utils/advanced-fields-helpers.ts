@@ -39,11 +39,46 @@ export const isRequiredField = (field: Field) => {
   return parsedData.data?.required === true;
 };
 
+const NAME_LIKE_TEXT_FIELD_PATTERN =
+  /\b(name|full\s*name|your\s*name|legal\s*name|print\s*name|signer\s*name)\b/i;
+
+const isNameLikeTextFieldForCompletion = (field: Field): boolean => {
+  if (field.type !== FieldType.TEXT) {
+    return false;
+  }
+
+  const label = typeof field.fieldMeta?.label === 'string' ? field.fieldMeta.label : '';
+  const placeholder =
+    typeof field.fieldMeta?.placeholder === 'string' ? field.fieldMeta.placeholder : '';
+
+  return NAME_LIKE_TEXT_FIELD_PATTERN.test(`${label} ${placeholder}`.trim());
+};
+
+/**
+ * Name fields may be left empty when completing a document.
+ */
+const isSkippableEmptyNameField = (field: Field): boolean => {
+  if (field.inserted) {
+    return false;
+  }
+
+  return field.type === FieldType.NAME || isNameLikeTextFieldForCompletion(field);
+};
+
 /**
  * Whether the provided field is required and not inserted.
  */
-export const isFieldUnsignedAndRequired = (field: Field) =>
-  isRequiredField(field) && !field.inserted;
+export const isFieldUnsignedAndRequired = (field: Field) => {
+  if (!isRequiredField(field) || field.inserted) {
+    return false;
+  }
+
+  if (isSkippableEmptyNameField(field)) {
+    return false;
+  }
+
+  return true;
+};
 
 /**
  * Whether the provided fields contains a field that is required to be inserted.

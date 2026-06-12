@@ -90,7 +90,11 @@ export const EnvelopeSignerCompleteDialog = () => {
     recipientDetails?: { name: string; email: string },
   ) => {
     try {
-      await signRecipientIdentityFields();
+      await signRecipientIdentityFields(
+        recipientDetails
+          ? { name: recipientDetails.name, email: recipientDetails.email }
+          : undefined,
+      );
 
       await completeDocument({
         token: recipient.token,
@@ -150,7 +154,11 @@ export const EnvelopeSignerCompleteDialog = () => {
     recipientDetails?: { name: string; email: string },
   ) => {
     try {
-      await signRecipientIdentityFields();
+      await signRecipientIdentityFields(
+        recipientDetails
+          ? { name: recipientDetails.name, email: recipientDetails.email }
+          : { name: fullName, email },
+      );
 
       let directTemplateExternalId = searchParams?.get('externalId') || undefined;
 

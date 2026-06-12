@@ -104,6 +104,7 @@ export const DocumentSigningCompleteDialog = ({
 
   const [showTwoFactorForm, setShowTwoFactorForm] = useState(false);
   const [twoFactorValidationError, setTwoFactorValidationError] = useState<string | null>(null);
+  const [isCheckingFields, setIsCheckingFields] = useState(false);
 
   const { derivedRecipientAccessAuth } = useRequiredDocumentSigningAuthContext();
 
@@ -215,6 +216,20 @@ export const DocumentSigningCompleteDialog = ({
     void form.handleSubmit(onFormSubmit)();
   };
 
+  const handlePrimaryActionClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isComplete) {
+      event.preventDefault();
+    }
+
+    setIsCheckingFields(true);
+
+    try {
+      await fieldsValidated();
+    } finally {
+      setIsCheckingFields(false);
+    }
+  };
+
   return (
     <Dialog open={showDialog} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -222,8 +237,8 @@ export const DocumentSigningCompleteDialog = ({
           className="w-full"
           type="button"
           size={buttonSize}
-          onClick={fieldsValidated}
-          loading={isSubmitting}
+          onClick={handlePrimaryActionClick}
+          loading={isSubmitting || isCheckingFields}
           disabled={disabled}
         >
           {match({ isComplete, role: recipient.role })

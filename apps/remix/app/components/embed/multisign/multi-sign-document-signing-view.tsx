@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
-import { DocumentStatus, SigningStatus } from '@prisma/client';
+import { DocumentStatus, FieldType, SigningStatus } from '@prisma/client';
 import { Loader, LucideChevronDown, LucideChevronUp, X } from 'lucide-react';
 import { P, match } from 'ts-pattern';
 
 import { PDF_VIEWER_PAGE_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
+import { DO_NOT_INVALIDATE_QUERY_ON_MUTATION } from '@documenso/lib/constants/trpc';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
+import { isFieldUnsignedAndRequired } from '@documenso/lib/utils/advanced-fields-helpers';
+import { validateFieldsInserted } from '@documenso/lib/utils/fields';
 import { isSignatureFieldType } from '@documenso/prisma/guards/is-signature-field';
 import { trpc } from '@documenso/trpc/react';
 import type {
@@ -25,6 +28,8 @@ import { Label } from '@documenso/ui/primitives/label';
 import { PDFViewerLazy } from '@documenso/ui/primitives/pdf-viewer/lazy';
 import { SignaturePadDialog } from '@documenso/ui/primitives/signature-pad/signature-pad-dialog';
 import { useToast } from '@documenso/ui/primitives/use-toast';
+
+import { useSigningIdentityFieldSync } from '~/hooks/use-signing-identity-field-sync';
 
 import { useRequiredDocumentSigningContext } from '../../general/document-signing/document-signing-provider';
 import { DocumentSigningRejectDialog } from '../../general/document-signing/document-signing-reject-dialog';
@@ -77,25 +82,84 @@ export const MultiSignDocumentSigningView = ({
     },
   );
 
-  const { mutateAsync: signFieldWithToken } = trpc.field.signFieldWithToken.useMutation();
+  const signingRecipient = useMemo(() => {
+    if (!document) {
+      return null;
+    }
+
+    const field = document.fields.find((item) => item.recipientId === recipientId);
+
+    if (!field?.recipient) {
+      return null;
+    }
+
+    return {
+      id: field.recipient.id,
+      name: field.recipient.name,
+      email: field.recipient.email,
+      token,
+    };
+  }, [document, recipientId, token]);
+
+  const documentFields = document?.fields ?? [];
+
+  const { mutateAsync: signFieldWithToken } = trpc.field.signFieldWithToken.useMutation(
+    DO_NOT_INVALIDATE_QUERY_ON_MUTATION,
+  );
   const { mutateAsync: removeSignedFieldWithToken } =
     trpc.field.removeSignedFieldWithToken.useMutation();
 
   const { mutateAsync: completeDocumentWithToken } =
     trpc.recipient.completeDocumentWithToken.useMutation();
 
-  const hasSignatureField = document?.fields.some((field) => isSignatureFieldType(field.type));
+  const { localFields, syncIdentityFields } = useSigningIdentityFieldSync({
+    fields: documentFields,
+    recipient: signingRecipient ?? { id: recipientId, name: '', email: '', token },
+    fullName,
+    email,
+    signField: async (fieldId, value) => {
+      const fieldValue =
+        value.type === FieldType.NAME ||
+        value.type === FieldType.EMAIL ||
+        value.type === FieldType.INITIALS ||
+        value.type === FieldType.TEXT
+          ? value.value
+          : null;
+
+      if (!fieldValue) {
+        throw new Error('Invalid identity field value');
+      }
+
+      return await signFieldWithToken({
+        token,
+        fieldId,
+        value: fieldValue,
+        isBase64: false,
+      });
+    },
+  });
+
+  const recipientFields = useMemo(
+    () => localFields.filter((field) => field.recipientId === recipientId),
+    [localFields, recipientId],
+  );
+
+  const hasSignatureField = recipientFields.some((field) => isSignatureFieldType(field.type));
+
+  const fieldsRequiringValidation = useMemo(
+    () => recipientFields.filter(isFieldUnsignedAndRequired),
+    [recipientFields],
+  );
 
   const [pendingFields, completedFields] = [
-    document?.fields.filter((field) => field.recipient.signingStatus !== SigningStatus.SIGNED) ??
-      [],
+    recipientFields.filter((field) => isFieldUnsignedAndRequired(field)),
     document?.fields.filter((field) => field.recipient.signingStatus === SigningStatus.SIGNED) ??
       [],
   ];
 
-  const highestPendingPageNumber = Math.max(...pendingFields.map((field) => field.page));
+  const highestPendingPageNumber = Math.max(...pendingFields.map((field) => field.page), 1);
 
-  const uninsertedFields = document?.fields.filter((field) => !field.inserted) ?? [];
+  const uninsertedFields = fieldsRequiringValidation.filter((field) => !field.inserted);
 
   const onSignField = async (payload: TSignFieldWithTokenMutationSchema) => {
     try {
@@ -135,6 +199,15 @@ export const MultiSignDocumentSigningView = ({
     try {
       setIsSubmitting(true);
 
+      await syncIdentityFields();
+
+      const isValid = validateFieldsInserted(fieldsRequiringValidation);
+
+      if (!isValid) {
+        setShowPendingFieldTooltip(true);
+        return;
+      }
+
       await completeDocumentWithToken({
         documentId: document!.id,
         token,
@@ -160,7 +233,10 @@ export const MultiSignDocumentSigningView = ({
     }
   };
 
-  const onNextFieldClick = () => {
+  const onNextFieldClick = async () => {
+    await syncIdentityFields();
+    validateFieldsInserted(fieldsRequiringValidation);
+
     setShowPendingFieldTooltip(true);
 
     setIsExpanded(false);
@@ -293,6 +369,7 @@ export const MultiSignDocumentSigningView = ({
                                   disabled={isNameLocked}
                                   value={fullName}
                                   onChange={(e) => !isNameLocked && setFullName(e.target.value)}
+                                  onBlur={() => void syncIdentityFields()}
                                 />
                               </div>
 

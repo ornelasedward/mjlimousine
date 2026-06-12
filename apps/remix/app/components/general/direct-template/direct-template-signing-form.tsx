@@ -6,6 +6,7 @@ import { FieldType } from '@prisma/client';
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
+import { useDebouncedValue } from '@documenso/lib/client-only/hooks/use-debounced-value';
 import { DEFAULT_DOCUMENT_DATE_FORMAT } from '@documenso/lib/constants/date-formats';
 import { PDF_VIEWER_PAGE_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
 import { DEFAULT_DOCUMENT_TIME_ZONE } from '@documenso/lib/constants/time-zones';
@@ -19,6 +20,10 @@ import {
 import type { TTemplate } from '@documenso/lib/types/template';
 import { isFieldUnsignedAndRequired } from '@documenso/lib/utils/advanced-fields-helpers';
 import { sortFieldsByPosition, validateFieldsInserted } from '@documenso/lib/utils/fields';
+import {
+  getUnsignedRequiredIdentityFields,
+  resolveSigningIdentityContext,
+} from '@documenso/lib/utils/signing-identity-fields';
 import type {
   TRemovedSignedFieldWithTokenMutationSchema,
   TSignFieldWithTokenMutationSchema,
@@ -50,6 +55,7 @@ import { useRequiredDocumentSigningContext } from '~/components/general/document
 import { DocumentSigningRadioField } from '~/components/general/document-signing/document-signing-radio-field';
 import { DocumentSigningSignatureField } from '~/components/general/document-signing/document-signing-signature-field';
 import { DocumentSigningTextField } from '~/components/general/document-signing/document-signing-text-field';
+import { autoSignIdentityFields } from '~/utils/field-signing/auto-sign-identity-fields';
 
 import { DocumentSigningRecipientProvider } from '../document-signing/document-signing-recipient-provider';
 
@@ -145,15 +151,64 @@ export const DirectTemplateSigningForm = ({
 
   const uninsertedFields = useMemo(() => {
     return sortFieldsByPosition(fieldsRequiringValidation);
-  }, [localFields]);
+  }, [fieldsRequiringValidation]);
 
-  const fieldsValidated = () => {
+  const debouncedFullName = useDebouncedValue(fullName.trim(), 300);
+
+  const syncLocalIdentityFields = async (overrides?: { name?: string; email?: string }) => {
+    const context = resolveSigningIdentityContext({
+      fullName,
+      email: directRecipient.email,
+      recipientName: directRecipient.name,
+      recipientEmail: directRecipient.email,
+      fields: localFields,
+      overrideName: overrides?.name,
+      overrideEmail: overrides?.email,
+    });
+
+    if (!context.fullName && !context.email) {
+      return [];
+    }
+
+    const identityFields = getUnsignedRequiredIdentityFields(localFields);
+
+    return await autoSignIdentityFields({
+      fields: identityFields,
+      context,
+      signField: async (fieldId, value) => {
+        const fieldValue =
+          value.type === FieldType.NAME ||
+          value.type === FieldType.EMAIL ||
+          value.type === FieldType.INITIALS ||
+          value.type === FieldType.TEXT
+            ? value.value
+            : null;
+
+        if (!fieldValue) {
+          return Promise.resolve();
+        }
+
+        onSignField({
+          token: directRecipient.token,
+          fieldId,
+          value: fieldValue,
+        });
+
+        return Promise.resolve();
+      },
+    });
+  };
+
+  const fieldsValidated = async () => {
+    await syncLocalIdentityFields();
     setValidateUninsertedFields(true);
     validateFieldsInserted(fieldsRequiringValidation);
   };
 
   const handleSubmit = async (nextSigner?: { name: string; email: string }) => {
     setValidateUninsertedFields(true);
+
+    await syncLocalIdentityFields();
 
     const isFieldsValid = validateFieldsInserted(fieldsRequiringValidation);
 
@@ -220,6 +275,15 @@ export const DirectTemplateSigningForm = ({
 
     setLocalFields(updatedFields);
   }, []);
+
+  useEffect(() => {
+    if (!debouncedFullName) {
+      return;
+    }
+
+    void syncLocalIdentityFields();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedFullName]);
 
   const nextRecipient = useMemo(() => {
     if (
@@ -406,6 +470,7 @@ export const DirectTemplateSigningForm = ({
                 id="full-name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value.trimStart())}
+                onBlur={() => void syncLocalIdentityFields()}
               />
             </div>
 

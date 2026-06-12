@@ -13,6 +13,10 @@ import type { DocumentAndSender } from '@documenso/lib/server-only/document/get-
 import type { TRecipientAccessAuth } from '@documenso/lib/types/document-auth';
 import { isFieldUnsignedAndRequired } from '@documenso/lib/utils/advanced-fields-helpers';
 import { sortFieldsByPosition } from '@documenso/lib/utils/fields';
+import {
+  getUnsignedRequiredIdentityFields,
+  resolveSigningIdentityContext,
+} from '@documenso/lib/utils/signing-identity-fields';
 import { isSignatureFieldType } from '@documenso/prisma/guards/is-signature-field';
 import type { RecipientWithFields } from '@documenso/prisma/types/recipient-with-fields';
 import { trpc } from '@documenso/trpc/react';
@@ -108,23 +112,33 @@ export const DocumentSigningForm = ({
     return fieldsRequiringValidation.filter((field) => field.recipientId === recipient.id);
   }, [fieldsRequiringValidation, recipient]);
 
-  const autoSignIdentityFieldsForRecipient = async () => {
-    const identityFields = localFields.filter(
-      (field) =>
-        field.recipientId === recipient.id &&
-        (field.type === FieldType.NAME ||
-          field.type === FieldType.EMAIL ||
-          field.type === FieldType.INITIALS),
+  const autoSignIdentityFieldsForRecipient = async (overrides?: {
+    name?: string;
+    email?: string;
+  }) => {
+    const context = resolveSigningIdentityContext({
+      fullName,
+      email,
+      recipientName: recipient.name,
+      recipientEmail: recipient.email,
+      fields: localFields,
+      overrideName: overrides?.name,
+      overrideEmail: overrides?.email,
+    });
+
+    const identityFields = getUnsignedRequiredIdentityFields(localFields).filter(
+      (field) => field.recipientId === recipient.id,
     );
 
     const signedFieldIds = await autoSignIdentityFields({
       fields: identityFields,
-      context: { fullName: fullName.trim(), email: email.trim() },
+      context,
       signField: async (fieldId, value) => {
         const fieldValue =
           value.type === FieldType.NAME ||
           value.type === FieldType.EMAIL ||
-          value.type === FieldType.INITIALS
+          value.type === FieldType.INITIALS ||
+          value.type === FieldType.TEXT
             ? value.value
             : null;
 
@@ -174,8 +188,13 @@ export const DocumentSigningForm = ({
   const handleCompleteDocument = async (options: {
     accessAuthOptions?: TRecipientAccessAuth;
     nextSigner?: { email: string; name: string };
+    recipientDetails?: { name: string; email: string };
   }) => {
-    await autoSignIdentityFieldsForRecipient();
+    await autoSignIdentityFieldsForRecipient(
+      options.recipientDetails
+        ? { name: options.recipientDetails.name, email: options.recipientDetails.email }
+        : undefined,
+    );
     await completeDocument(options);
   };
 
@@ -235,8 +254,8 @@ export const DocumentSigningForm = ({
                     documentTitle={document.title}
                     fields={localFields}
                     fieldsValidated={localFieldsValidated}
-                    onSignatureComplete={async (nextSigner, accessAuthOptions) =>
-                      handleCompleteDocument({ nextSigner, accessAuthOptions })
+                    onSignatureComplete={async (nextSigner, accessAuthOptions, recipientDetails) =>
+                      handleCompleteDocument({ nextSigner, accessAuthOptions, recipientDetails })
                     }
                     recipient={recipient}
                     allowDictateNextSigner={document.documentMeta?.allowDictateNextSigner}
@@ -397,10 +416,11 @@ export const DocumentSigningForm = ({
                   fields={localFields}
                   fieldsValidated={localFieldsValidated}
                   disabled={!isRecipientsTurn}
-                  onSignatureComplete={async (nextSigner, accessAuthOptions) =>
+                  onSignatureComplete={async (nextSigner, accessAuthOptions, recipientDetails) =>
                     handleCompleteDocument({
                       accessAuthOptions,
                       nextSigner,
+                      recipientDetails,
                     })
                   }
                   recipient={recipient}

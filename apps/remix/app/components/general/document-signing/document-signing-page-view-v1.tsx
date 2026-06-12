@@ -11,6 +11,7 @@ import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
 import { DEFAULT_DOCUMENT_DATE_FORMAT } from '@documenso/lib/constants/date-formats';
 import { PDF_VIEWER_PAGE_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
 import { DEFAULT_DOCUMENT_TIME_ZONE } from '@documenso/lib/constants/time-zones';
+import { DO_NOT_INVALIDATE_QUERY_ON_MUTATION } from '@documenso/lib/constants/trpc';
 import type { DocumentAndSender } from '@documenso/lib/server-only/document/get-document-by-token';
 import type { TRecipientAccessAuth } from '@documenso/lib/types/document-auth';
 import {
@@ -44,12 +45,13 @@ import { DocumentSigningForm } from '~/components/general/document-signing/docum
 import { DocumentSigningInitialsField } from '~/components/general/document-signing/document-signing-initials-field';
 import { DocumentSigningNameField } from '~/components/general/document-signing/document-signing-name-field';
 import { DocumentSigningNumberField } from '~/components/general/document-signing/document-signing-number-field';
+import { useRequiredDocumentSigningContext } from '~/components/general/document-signing/document-signing-provider';
 import { DocumentSigningRadioField } from '~/components/general/document-signing/document-signing-radio-field';
 import { DocumentSigningRejectDialog } from '~/components/general/document-signing/document-signing-reject-dialog';
 import { DocumentSigningSignatureField } from '~/components/general/document-signing/document-signing-signature-field';
 import { DocumentSigningTextField } from '~/components/general/document-signing/document-signing-text-field';
+import { useSigningIdentityFieldSync } from '~/hooks/use-signing-identity-field-sync';
 
-import { useRequiredDocumentSigningAuthContext } from './document-signing-auth-provider';
 import { DocumentSigningCompleteDialog } from './document-signing-complete-dialog';
 import { DocumentSigningRecipientProvider } from './document-signing-recipient-provider';
 
@@ -72,16 +74,43 @@ export const DocumentSigningPageViewV1 = ({
   allRecipients = [],
   includeSenderDetails,
 }: DocumentSigningPageViewV1Props) => {
-  const { documentData, documentMeta } = document;
-
-  const { derivedRecipientAccessAuth, user: authUser } = useRequiredDocumentSigningAuthContext();
-
-  const hasAuthenticator = authUser?.twoFactorEnabled
-    ? authUser.twoFactorEnabled && authUser.email === recipient.email
-    : false;
+  const { documentMeta } = document;
 
   const navigate = useNavigate();
   const analytics = useAnalytics();
+
+  const { fullName, email } = useRequiredDocumentSigningContext();
+
+  const { mutateAsync: signFieldWithToken } = trpc.field.signFieldWithToken.useMutation(
+    DO_NOT_INVALIDATE_QUERY_ON_MUTATION,
+  );
+
+  const { localFields, syncIdentityFields } = useSigningIdentityFieldSync({
+    fields,
+    recipient,
+    fullName,
+    email,
+    signField: async (fieldId, value) => {
+      const fieldValue =
+        value.type === FieldType.NAME ||
+        value.type === FieldType.EMAIL ||
+        value.type === FieldType.INITIALS ||
+        value.type === FieldType.TEXT
+          ? value.value
+          : null;
+
+      if (!fieldValue) {
+        throw new Error('Invalid identity field value');
+      }
+
+      return await signFieldWithToken({
+        token: recipient.token,
+        fieldId,
+        value: fieldValue,
+        isBase64: false,
+      });
+    },
+  });
 
   const [selectedSignerId, setSelectedSignerId] = useState<number | null>(allRecipients?.[0]?.id);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -96,19 +125,25 @@ export const DocumentSigningPageViewV1 = ({
   const isSubmitting = isPending || isSuccess;
 
   const fieldsRequiringValidation = useMemo(
-    () => fields.filter(isFieldUnsignedAndRequired),
-    [fields],
+    () => localFields.filter(isFieldUnsignedAndRequired),
+    [localFields],
   );
 
-  const fieldsValidated = () => {
+  const fieldsValidated = async () => {
+    await syncIdentityFields();
     validateFieldsInserted(fieldsRequiringValidation);
   };
 
   const completeDocument = async (options: {
     accessAuthOptions?: TRecipientAccessAuth;
     nextSigner?: { email: string; name: string };
+    recipientDetails?: { name: string; email: string };
   }) => {
-    const { accessAuthOptions, nextSigner } = options;
+    const { accessAuthOptions, nextSigner, recipientDetails } = options;
+
+    await syncIdentityFields(
+      recipientDetails ? { name: recipientDetails.name, email: recipientDetails.email } : undefined,
+    );
 
     const payload = {
       token: recipient.token,
@@ -314,11 +349,15 @@ export const DocumentSigningPageViewV1 = ({
                         <DocumentSigningCompleteDialog
                           isSubmitting={isSubmitting}
                           documentTitle={document.title}
-                          fields={fields}
+                          fields={localFields}
                           fieldsValidated={fieldsValidated}
                           disabled={!isRecipientsTurn}
-                          onSignatureComplete={async (nextSigner) =>
-                            completeDocument({ nextSigner })
+                          onSignatureComplete={async (
+                            nextSigner,
+                            accessAuthOptions,
+                            recipientDetails,
+                          ) =>
+                            completeDocument({ nextSigner, accessAuthOptions, recipientDetails })
                           }
                           recipient={recipient}
                           allowDictateNextSigner={

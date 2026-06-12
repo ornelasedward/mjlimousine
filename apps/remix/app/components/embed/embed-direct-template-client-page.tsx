@@ -15,6 +15,7 @@ import { LucideChevronDown, LucideChevronUp } from 'lucide-react';
 import { DateTime } from 'luxon';
 import { useSearchParams } from 'react-router';
 
+import { useDebouncedValue } from '@documenso/lib/client-only/hooks/use-debounced-value';
 import { useThrottleFn } from '@documenso/lib/client-only/hooks/use-throttle-fn';
 import { DEFAULT_DOCUMENT_DATE_FORMAT } from '@documenso/lib/constants/date-formats';
 import { PDF_VIEWER_PAGE_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
@@ -24,6 +25,10 @@ import {
   isRequiredField,
 } from '@documenso/lib/utils/advanced-fields-helpers';
 import { validateFieldsInserted } from '@documenso/lib/utils/fields';
+import {
+  getUnsignedRequiredIdentityFields,
+  resolveSigningIdentityContext,
+} from '@documenso/lib/utils/signing-identity-fields';
 import { isSignatureFieldType } from '@documenso/prisma/guards/is-signature-field';
 import { trpc } from '@documenso/trpc/react';
 import type {
@@ -42,6 +47,7 @@ import { useToast } from '@documenso/ui/primitives/use-toast';
 import { BrandingLogo } from '~/components/general/branding-logo';
 import { ZDirectTemplateEmbedDataSchema } from '~/types/embed-direct-template-schema';
 import { injectCss } from '~/utils/css-vars';
+import { autoSignIdentityFields } from '~/utils/field-signing/auto-sign-identity-fields';
 
 import type { DirectTemplateLocalField } from '../general/direct-template/direct-template-signing-form';
 import { DocumentSigningAttachmentsPopover } from '../general/document-signing/document-signing-attachments-popover';
@@ -109,6 +115,60 @@ export const EmbedDirectTemplateClientPage = ({
 
   const { mutateAsync: createDocumentFromDirectTemplate, isPending: isSubmitting } =
     trpc.template.createDocumentFromDirectTemplate.useMutation();
+
+  const debouncedFullName = useDebouncedValue(fullName.trim(), 300);
+  const debouncedEmail = useDebouncedValue(email.trim(), 300);
+
+  const syncLocalIdentityFields = async () => {
+    const context = resolveSigningIdentityContext({
+      fullName,
+      email,
+      recipientName: recipient.name,
+      recipientEmail: recipient.email,
+      fields: localFields,
+    });
+
+    if (!context.fullName && !context.email) {
+      return [];
+    }
+
+    const identityFields = getUnsignedRequiredIdentityFields(localFields);
+
+    return await autoSignIdentityFields({
+      fields: identityFields,
+      context,
+      signField: async (fieldId, value) => {
+        const fieldValue =
+          value.type === FieldType.NAME ||
+          value.type === FieldType.EMAIL ||
+          value.type === FieldType.INITIALS ||
+          value.type === FieldType.TEXT
+            ? value.value
+            : null;
+
+        if (!fieldValue) {
+          return Promise.resolve();
+        }
+
+        onSignField({
+          token: recipient.token,
+          fieldId,
+          value: fieldValue,
+        });
+
+        return Promise.resolve();
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!debouncedFullName && !debouncedEmail) {
+      return;
+    }
+
+    void syncLocalIdentityFields();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedEmail, debouncedFullName]);
 
   const onSignField = (payload: TSignFieldWithTokenMutationSchema) => {
     setLocalFields((fields) =>
@@ -190,7 +250,8 @@ export const EmbedDirectTemplateClientPage = ({
     setShowPendingFieldTooltip(false);
   };
 
-  const onNextFieldClick = () => {
+  const onNextFieldClick = async () => {
+    await syncLocalIdentityFields();
     validateFieldsInserted(pendingFields);
 
     setShowPendingFieldTooltip(true);
@@ -199,6 +260,8 @@ export const EmbedDirectTemplateClientPage = ({
 
   const onCompleteClick = async () => {
     try {
+      await syncLocalIdentityFields();
+
       const valid = validateFieldsInserted(pendingFields);
 
       if (!valid) {
@@ -417,6 +480,7 @@ export const EmbedDirectTemplateClientPage = ({
                     disabled={isNameLocked}
                     value={fullName}
                     onChange={(e) => !isNameLocked && setFullName(e.target.value)}
+                    onBlur={() => void syncLocalIdentityFields()}
                   />
                 </div>
 
@@ -461,7 +525,7 @@ export const EmbedDirectTemplateClientPage = ({
 
             <div className="mt-4 hidden w-full grid-cols-2 items-center group-data-[expanded]/document-widget:grid md:grid">
               {pendingFields.length > 0 ? (
-                <Button className="col-start-2" onClick={() => onNextFieldClick()}>
+                <Button className="col-start-2" onClick={async () => onNextFieldClick()}>
                   <Trans>Next</Trans>
                 </Button>
               ) : (

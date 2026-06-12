@@ -4,11 +4,12 @@ import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import type { DocumentMeta, EnvelopeItem } from '@prisma/client';
-import { type Field, RecipientRole, SigningStatus } from '@prisma/client';
+import { type Field, FieldType, RecipientRole, SigningStatus } from '@prisma/client';
 import { LucideChevronDown, LucideChevronUp } from 'lucide-react';
 
 import { useThrottleFn } from '@documenso/lib/client-only/hooks/use-throttle-fn';
 import { PDF_VIEWER_PAGE_SELECTOR } from '@documenso/lib/constants/pdf-viewer';
+import { DO_NOT_INVALIDATE_QUERY_ON_MUTATION } from '@documenso/lib/constants/trpc';
 import { isFieldUnsignedAndRequired } from '@documenso/lib/utils/advanced-fields-helpers';
 import { validateFieldsInserted } from '@documenso/lib/utils/fields';
 import { isSignatureFieldType } from '@documenso/prisma/guards/is-signature-field';
@@ -29,6 +30,7 @@ import { SignaturePadDialog } from '@documenso/ui/primitives/signature-pad/signa
 import { useToast } from '@documenso/ui/primitives/use-toast';
 
 import { BrandingLogo } from '~/components/general/branding-logo';
+import { useSigningIdentityFieldSync } from '~/hooks/use-signing-identity-field-sync';
 import { injectCss } from '~/utils/css-vars';
 
 import { ZSignDocumentEmbedDataSchema } from '../../types/embed-document-sign-schema';
@@ -76,6 +78,37 @@ export const EmbedSignDocumentV1ClientPage = ({
   const { fullName, email, signature, setFullName, setSignature } =
     useRequiredDocumentSigningContext();
 
+  const { mutateAsync: signFieldWithToken } = trpc.field.signFieldWithToken.useMutation(
+    DO_NOT_INVALIDATE_QUERY_ON_MUTATION,
+  );
+
+  const { localFields, syncIdentityFields } = useSigningIdentityFieldSync({
+    fields,
+    recipient,
+    fullName,
+    email,
+    signField: async (fieldId, value) => {
+      const fieldValue =
+        value.type === FieldType.NAME ||
+        value.type === FieldType.EMAIL ||
+        value.type === FieldType.INITIALS ||
+        value.type === FieldType.TEXT
+          ? value.value
+          : null;
+
+      if (!fieldValue) {
+        throw new Error('Invalid identity field value');
+      }
+
+      return await signFieldWithToken({
+        token: recipient.token,
+        fieldId,
+        value: fieldValue,
+        isBase64: false,
+      });
+    },
+  });
+
   const [hasFinishedInit, setHasFinishedInit] = useState(false);
   const [hasDocumentLoaded, setHasDocumentLoaded] = useState(false);
   const [hasCompletedDocument, setHasCompletedDocument] = useState(isCompleted);
@@ -100,10 +133,10 @@ export const EmbedSignDocumentV1ClientPage = ({
   const [throttledOnCompleteClick, isThrottled] = useThrottleFn(() => void onCompleteClick(), 500);
 
   const [pendingFields, _completedFields] = [
-    fields.filter(
+    localFields.filter(
       (field) => field.recipientId === recipient.id && isFieldUnsignedAndRequired(field),
     ),
-    fields.filter((field) => field.inserted),
+    localFields.filter((field) => field.inserted),
   ];
 
   const highestPendingPageNumber = Math.max(...pendingFields.map((field) => field.page));
@@ -112,8 +145,8 @@ export const EmbedSignDocumentV1ClientPage = ({
     trpc.recipient.completeDocumentWithToken.useMutation();
 
   const fieldsRequiringValidation = useMemo(
-    () => fields.filter(isFieldUnsignedAndRequired),
-    [fields],
+    () => localFields.filter(isFieldUnsignedAndRequired),
+    [localFields],
   );
 
   const hasSignatureField = fields.some((field) => isSignatureFieldType(field.type));
@@ -122,7 +155,8 @@ export const EmbedSignDocumentV1ClientPage = ({
 
   const assistantSignersId = useId();
 
-  const onNextFieldClick = () => {
+  const onNextFieldClick = async () => {
+    await syncIdentityFields();
     validateFieldsInserted(fieldsRequiringValidation);
 
     setShowPendingFieldTooltip(true);
@@ -131,6 +165,8 @@ export const EmbedSignDocumentV1ClientPage = ({
 
   const onCompleteClick = async () => {
     try {
+      await syncIdentityFields();
+
       const valid = validateFieldsInserted(fieldsRequiringValidation);
 
       if (!valid) {
@@ -474,7 +510,7 @@ export const EmbedSignDocumentV1ClientPage = ({
 
               <div className="embed--DocumentWidgetFooter mt-4 hidden w-full grid-cols-2 items-center group-data-[expanded]/document-widget:grid md:grid">
                 {pendingFields.length > 0 ? (
-                  <Button className="col-start-2" onClick={() => onNextFieldClick()}>
+                  <Button className="col-start-2" onClick={async () => onNextFieldClick()}>
                     <Trans>Next</Trans>
                   </Button>
                 ) : (

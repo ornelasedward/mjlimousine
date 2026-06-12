@@ -20,7 +20,10 @@ import {
   isRequiredField,
 } from '@documenso/lib/utils/advanced-fields-helpers';
 import { extractFieldInsertionValues } from '@documenso/lib/utils/envelope-signing';
-import { deriveSigningIdentityValues } from '@documenso/lib/utils/signing-identity';
+import {
+  getUnsignedRequiredIdentityFields,
+  resolveSigningIdentityContext,
+} from '@documenso/lib/utils/signing-identity-fields';
 import { trpc } from '@documenso/trpc/react';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
 
@@ -62,7 +65,7 @@ export type EnvelopeSigningContextValue = {
     authOptions?: TRecipientActionAuth,
   ) => Promise<Pick<Field, 'id' | 'inserted'>>;
 
-  signRecipientIdentityFields: () => Promise<number[]>;
+  signRecipientIdentityFields: (overrides?: { name?: string; email?: string }) => Promise<number[]>;
 };
 
 const EnvelopeSigningContext = createContext<EnvelopeSigningContextValue | null>(null);
@@ -100,12 +103,12 @@ export const EnvelopeSigningProvider = ({
 
   const { envelope, recipient } = envelopeData;
 
-  const initialIdentity = deriveSigningIdentityValues({
+  const initialIdentity = resolveSigningIdentityContext({
+    fullName: initialFullName,
+    email: initialEmail,
     recipientName: recipient.name,
     recipientEmail: recipient.email,
     fields: envelopeData.recipient.fields,
-    fallbackName: initialFullName,
-    fallbackEmail: initialEmail,
   });
 
   const [fullName, setFullName] = useState(initialIdentity.fullName);
@@ -328,22 +331,27 @@ export const EnvelopeSigningProvider = ({
     return signedField;
   };
 
-  const signRecipientIdentityFields = async () => {
+  const signRecipientIdentityFields = async (overrides?: { name?: string; email?: string }) => {
     if (recipient.role === RecipientRole.ASSISTANT) {
       return [];
     }
 
-    const identityContext = {
-      fullName: fullName.trim(),
-      email: email.trim(),
-    };
+    const identityContext = resolveSigningIdentityContext({
+      fullName,
+      email,
+      recipientName: recipient.name,
+      recipientEmail: recipient.email,
+      fields: envelopeData.recipient.fields,
+      overrideName: overrides?.name,
+      overrideEmail: overrides?.email,
+    });
 
     if (!identityContext.fullName && !identityContext.email) {
       return [];
     }
 
     return await autoSignIdentityFields({
-      fields: envelopeData.recipient.fields.filter((field) => isFieldUnsignedAndRequired(field)),
+      fields: getUnsignedRequiredIdentityFields(envelopeData.recipient.fields),
       context: identityContext,
       signField: async (fieldId, value) => signField(fieldId, value),
     });
@@ -421,11 +429,24 @@ export const EnvelopeSigningProvider = ({
     }
 
     void autoSignIdentityFields({
-      fields: envelopeData.recipient.fields.filter((field) => isFieldUnsignedAndRequired(field)),
-      context: { fullName: debouncedFullName, email: debouncedEmail },
+      fields: getUnsignedRequiredIdentityFields(envelopeData.recipient.fields),
+      context: resolveSigningIdentityContext({
+        fullName: debouncedFullName,
+        email: debouncedEmail,
+        recipientName: recipient.name,
+        recipientEmail: recipient.email,
+        fields: envelopeData.recipient.fields,
+      }),
       signField: async (fieldId, value) => signField(fieldId, value),
     });
-  }, [debouncedFullName, debouncedEmail, envelopeData.recipient.fields, recipient.role]);
+  }, [
+    debouncedEmail,
+    debouncedFullName,
+    envelopeData.recipient.fields,
+    recipient.email,
+    recipient.name,
+    recipient.role,
+  ]);
 
   return (
     <EnvelopeSigningContext.Provider

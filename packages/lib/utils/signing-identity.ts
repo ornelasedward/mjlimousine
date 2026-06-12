@@ -26,9 +26,25 @@ export const deriveSigningIdentityValues = ({
   fallbackEmail,
 }: DeriveSigningIdentityValuesOptions): SigningIdentityValues => {
   const insertedNameValue =
-    fields.find((field) => field.type === FieldType.NAME && field.inserted)?.customText || '';
+    fields.find(
+      (field) =>
+        field.inserted &&
+        (field.type === FieldType.NAME ||
+          (field.type === FieldType.TEXT &&
+            /\b(name|full\s*name|your\s*name|legal\s*name|print\s*name|signer\s*name)\b/i.test(
+              `${field.fieldMeta?.label ?? ''} ${field.fieldMeta?.placeholder ?? ''}`,
+            ))),
+    )?.customText || '';
   const insertedEmailValue =
-    fields.find((field) => field.type === FieldType.EMAIL && field.inserted)?.customText || '';
+    fields.find(
+      (field) =>
+        field.inserted &&
+        (field.type === FieldType.EMAIL ||
+          (field.type === FieldType.TEXT &&
+            /\b(e-?mail|email\s*address)\b/i.test(
+              `${field.fieldMeta?.label ?? ''} ${field.fieldMeta?.placeholder ?? ''}`,
+            ))),
+    )?.customText || '';
 
   return {
     fullName: insertedNameValue || recipientName || fallbackName || '',
